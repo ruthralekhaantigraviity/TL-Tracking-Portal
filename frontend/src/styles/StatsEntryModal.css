@@ -1,0 +1,267 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #0f172a; 
+    display: flex;
+    align-items: stretch; /* Stretch to fill */
+    justify-content: center;
+    z-index: 1000;
+}
+
+
+
+.modal-content {
+    background: #0f172a;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 10%; /* Reduced top/bottom padding */
+    position: relative;
+    border: none;
+    border-radius: 0;
+    overflow: hidden; /* Prevent container scrolling */
+}
+
+.stats-form {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto; /* Restore scrolling */
+    padding-right: 15px; /* Space for scrollbar */
+}
+
+
+
+
+/* Custom Scrollbar for better aesthetics */
+.stats-form::-webkit-scrollbar {
+    width: 6px;
+}
+
+.stats-form::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.stats-form::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.stats-form::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem; /* Reduced margin */
+}
+
+
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-title h2 {
+    font-size: 1.5rem;
+    color: #fff;
+    margin: 0;
+}
+
+.icon-purple {
+    color: #a855f7;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.close-btn:hover {
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+.stats-form .form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 1.25rem; /* Tighter gap */
+}
+
+
+
+.form-group.full-width {
+    grid-column: span 3;
+}
+
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.form-group input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    color: #fff;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.form-group input:focus {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    background: #0f172a;
+    position: sticky; /* Make it sticky */
+    bottom: -1px; /* Stick to bottom */
+    z-index: 10;
+}
+
+
+
+
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: #fff;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+}
+
+.dual-input {
+    display: flex;
+    gap: 8px;
+}
+
+.dual-input input:first-child {
+    flex: 0 0 80px; /* Smaller width for numbers */
+}
+
+.dual-input input:last-child {
+    flex: 1; /* More space for category text */
+}
+
+.progress-bar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    transition: width 0.4s ease;
+}
+
+
+/* Admin Manual Entry View */
+.admin-manual-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem 0;
+}
+
+.admin-header-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    padding: 12px 20px;
+    border-radius: 16px;
+    color: #6366f1;
+    font-weight: 700;
+    font-size: 0.9rem;
+    width: fit-content;
+}
+
+.admin-textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 1.5rem;
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1.6;
+    outline: none;
+    transition: all 0.3s ease;
+    resize: none;
+}
+
+.admin-textarea:focus {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #6366f1;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
+}
+
+.admin-notice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: rgba(245, 158, 11, 0.05);
+    border: 1px solid rgba(245, 158, 11, 0.1);
+    border-radius: 12px;
+    color: #f59e0b;
+    font-size: 0.85rem;
+}
