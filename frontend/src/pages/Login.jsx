@@ -42,7 +42,7 @@ const Login = ({ onLoginSuccess }) => {
             <label><User size={16} /> Username</label>
             <input 
               type="text" 
-              placeholder="e.g. srisha" 
+              placeholder="" 
               value={username} 
               onChange={(e) => setUsername(e.target.value)} 
               required 
@@ -53,7 +53,7 @@ const Login = ({ onLoginSuccess }) => {
             <label><Lock size={16} /> Password</label>
             <input 
               type="password" 
-              placeholder="••••••••" 
+              placeholder="" 
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
               required 
