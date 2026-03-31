@@ -4,7 +4,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.4); 
+    background: var(--shadow-color); 
     backdrop-filter: blur(8px);
     display: flex;
     align-items: stretch; /* Stretch to fill */
@@ -47,12 +47,12 @@
 }
 
 .stats-form::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--border-color);
     border-radius: 10px;
 }
 
 .stats-form::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--accent-primary);
 }
 
 
@@ -90,7 +90,7 @@
 }
 
 .close-btn:hover {
-    color: #fff;
+    color: var(--text-primary);
     transform: rotate(90deg);
 }
 
@@ -165,7 +165,7 @@
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-glass);
 }
 
 .btn-primary {
@@ -201,7 +201,7 @@
 
 .progress-bar {
     height: 8px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-glass);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -236,11 +236,11 @@
 
 .admin-textarea {
     width: 100%;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
     border-radius: 20px;
     padding: 1.5rem;
-    color: #fff;
+    color: var(--text-primary);
     font-size: 1rem;
     line-height: 1.6;
     outline: none;

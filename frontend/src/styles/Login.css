@@ -19,7 +19,7 @@
   background: var(--bg-sidebar);
   border: 1px solid var(--border-color);
   backdrop-filter: blur(20px);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 25px 50px -12px var(--shadow-color);
 }
 
 .login-header {
@@ -31,7 +31,7 @@
   width: 70px;
   height: 70px;
   background: linear-gradient(135deg, #6366f1, #a855f7);
-  color: #fff;
+  color: var(--text-primary);
   border-radius: 20px;
   display: flex;
   align-items: center;
@@ -85,14 +85,13 @@
 }
 
 .input-group input:focus {
-  border-color: #6366f1;
-  background: rgba(99, 102, 241, 0.1);
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+  border-color: var(--accent-primary);
+  background: var(--bg-glass);
 }
 
 .login-btn {
   background: linear-gradient(135deg, #6366f1, #a855f7);
-  color: #fff;
+  color: var(--text-primary);
   border: none;
   border-radius: 12px;
   padding: 1rem;
@@ -120,6 +119,6 @@
 .login-footer {
   text-align: center;
   margin-top: 3rem;
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 0.85rem;
 }

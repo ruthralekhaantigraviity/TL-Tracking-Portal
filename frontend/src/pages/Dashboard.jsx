@@ -387,28 +387,29 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                              </button>
                          </div>
                     ) : (user.role === 'Admin' || user.role === 'Manager') && (
-                        <div className="admin-controls glass" style={{ marginRight: '15px', display: 'flex', alignItems: 'center', background: 'rgba(99, 102, 241, 0.1)', padding: '5px 15px', borderRadius: '12px', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
+                        <div className="admin-controls glass" style={{ marginRight: '15px', display: 'flex', alignItems: 'center', background: 'var(--bg-glass)', padding: '5px 15px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                             <ShieldCheck size={16} style={{ color: '#6366f1', marginRight: '10px' }} />
                             <select 
                                 value={selectedTeam} 
                                 onChange={(e) => setSelectedTeam(e.target.value)} 
                                 style={{
-                                    background: 'var(--bg-glass)',
-                                    border: '1px solid var(--border-color)',
-                                    borderRadius: '12px',
-                                    padding: '0.75rem 1rem',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    padding: '0.4rem 0.6rem',
                                     color: 'var(--text-primary)',
                                     fontSize: '0.95rem',
+                                    fontWeight: '600',
                                     outline: 'none',
-                                    width: '100%',
-                                    resize: 'vertical'
+                                    cursor: 'pointer',
+                                    width: 'auto',
+                                    minWidth: '160px'
                                 }}
                             >
-                                <option value="All" style={{ background: '#0f172a' }}>Global Overview</option>
-                                <option value="HR" style={{ background: '#0f172a' }}>HR Department</option>
-                                <option value="SBI" style={{ background: '#0f172a' }}>SBI Department</option>
-                                <option value="BDE" style={{ background: '#0f172a' }}>BDE Department</option>
-                                <option value="Administration" style={{ background: '#0f172a' }}>Administration</option>
+                                <option value="All">Global Overview</option>
+                                <option value="HR">HR Department</option>
+                                <option value="SBI">SBI Department</option>
+                                <option value="BDE">BDE Department</option>
+                                <option value="Administration">Administration</option>
                             </select>
                         </div>
                     )}

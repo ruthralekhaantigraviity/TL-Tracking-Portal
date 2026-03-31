@@ -68,8 +68,8 @@
 }
 
 .nav-item.active {
-    background: rgba(99, 102, 241, 0.1);
-    color: #6366f1;
+    background: var(--bg-glass);
+    color: var(--accent-primary);
 }
 
 .item-icon {
@@ -86,13 +86,13 @@
 }
 
 .active-indicator {
-    color: #6366f1;
+    color: var(--accent-primary);
 }
 
 .sidebar-footer {
     margin-top: auto;
     padding-top: 2rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid var(--border-color);
 }
 
 .logout:hover {
