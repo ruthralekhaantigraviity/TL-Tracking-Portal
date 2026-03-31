@@ -80,9 +80,9 @@ router.post('/seed-users', async (req, res) => {
     try {
         await User.deleteMany({});
         const users = await User.create([
-            { username: 'sabari', password: 'password123', name: 'Sabari', designation: 'TL BDE', role: 'TL', assignedTeam: 'BDE' },
-            { username: 'srisha', password: 'password123', name: 'Srisha', designation: 'TL SBI', role: 'TL', assignedTeam: 'SBI' },
-            { username: 'adithya', password: 'password123', name: 'Adithya', designation: 'HR Manager', role: 'Manager', assignedTeam: 'HR' },
+            { username: 'sabari', password: 'sabari123', name: 'Sabari', designation: 'TL BDE', role: 'TL', assignedTeam: 'BDE' },
+            { username: 'srisha', password: 'srisha123', name: 'Srisha', designation: 'TL SBI', role: 'TL', assignedTeam: 'SBI' },
+            { username: 'Aditiya', password: 'Aditiya123', name: 'Aditiya', designation: 'HR Manager', role: 'Manager', assignedTeam: 'HR' },
             { username: 'vaideeshwari', password: 'password123', name: 'Vaideeshwari', designation: 'Administration', role: 'Admin', assignedTeam: 'All' },
             { username: 'admin', password: 'password123', name: 'Admin User', designation: 'Portal Admin', role: 'Admin', assignedTeam: 'All' }
         ]);
