@@ -19,9 +19,11 @@ function App() {
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
-      // Auto-set team for TLs
+      // Auto-set team for TLs, default to 'All' for Admin/Manager
       if (parsedUser.role === 'TL') {
         setSelectedTeam(parsedUser.assignedTeam);
+      } else if (parsedUser.role === 'Admin' || parsedUser.role === 'Manager') {
+        setSelectedTeam('All');
       }
     }
   }, []);
@@ -34,9 +36,9 @@ function App() {
 
   const handleLoginSuccess = (userData) => {
     setUser(userData);
-    if (userData.role === 'TL') {
-      setSelectedTeam(userData.assignedTeam);
-    } else if (userData.assignedTeam !== 'All') {
+    if (userData.role === 'Admin' || userData.role === 'Manager') {
+      setSelectedTeam('All');
+    } else {
       setSelectedTeam(userData.assignedTeam);
     }
   };
