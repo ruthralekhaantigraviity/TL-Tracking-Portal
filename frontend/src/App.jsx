@@ -24,16 +24,6 @@ function App() {
         setSelectedTeam(parsedUser.assignedTeam);
       }
     }
-
-    // Initial data seeding
-    const initData = async () => {
-      try {
-        await seedData();
-      } catch (err) {
-        console.error('Initialization error:', err);
-      }
-    };
-    initData();
   }, []);
 
   const handleLogout = () => {
