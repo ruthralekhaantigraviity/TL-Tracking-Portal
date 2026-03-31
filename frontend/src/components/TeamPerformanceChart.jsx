@@ -1,7 +1,7 @@
 import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
-const TeamPerformanceChart = ({ members }) => {
+const TeamPerformanceChart = ({ members, theme }) => {
     // Aggregating last 7 days of data from members' performance history
     const aggregateData = () => {
         const last7Days = [];
@@ -36,7 +36,7 @@ const TeamPerformanceChart = ({ members }) => {
 
     return (
         <div className="chart-container glass" style={{ height: '350px', padding: '20px', borderRadius: '24px', marginTop: '20px' }}>
-            <h3 style={{ marginBottom: '20px', color: '#fff' }}>Weekly Team Productivity Trend</h3>
+            <h3 style={{ marginBottom: '20px', color: 'var(--text-primary)' }}>Weekly Team Productivity Trend</h3>
             <ResponsiveContainer width="100%" height="90%">
                 <AreaChart data={chartData}>
                     <defs>
@@ -49,7 +49,7 @@ const TeamPerformanceChart = ({ members }) => {
                             <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                         </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)'} />
                     <XAxis 
                         dataKey="name" 
                         stroke="#94a3b8" 
@@ -65,10 +65,10 @@ const TeamPerformanceChart = ({ members }) => {
                     />
                     <Tooltip 
                         contentStyle={{ 
-                            backgroundColor: '#0f172a', 
-                            border: '1px solid rgba(255,255,255,0.1)',
+                            backgroundColor: theme === 'dark' ? '#0f172a' : '#ffffff', 
+                            border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
                             borderRadius: '12px',
-                            color: '#fff'
+                            color: theme === 'dark' ? '#fff' : '#000'
                         }} 
                     />
                     <Legend iconType="circle" />

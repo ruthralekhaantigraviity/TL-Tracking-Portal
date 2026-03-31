@@ -584,7 +584,7 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                         </div>
                     </div>
 
-                    <TeamPerformanceChart members={members} />
+                    <TeamPerformanceChart members={members} theme={theme} />
                 </>
             )}
 
