@@ -48,25 +48,6 @@ const IndividualPerformance = ({ member, onBack, theme, toggleTheme }) => {
                     Back to Team
                 </button>
                 <div className="header-actions">
-                    <button 
-                        className="theme-toggle-btn glass" 
-                        onClick={toggleTheme}
-                        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                        style={{
-                            background: 'rgba(99, 102, 241, 0.1)',
-                            border: '1px solid rgba(99, 102, 241, 0.2)',
-                            color: '#6366f1',
-                            padding: '10px',
-                            borderRadius: '12px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            marginRight: '15px'
-                        }}
-                    >
-                        {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-                    </button>
                     <button className="btn-primary" onClick={downloadPDF}>
                         <Download size={18} />
                         Download Report

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
+import { Sun, Moon } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import HRTeamList from './pages/HRTeamList';
@@ -57,6 +58,13 @@ function App() {
         <div className="login-wrapper">
           <Login onLoginSuccess={handleLoginSuccess} theme={theme} toggleTheme={toggleTheme} />
         </div>
+        <button 
+          className="global-theme-toggle" 
+          onClick={toggleTheme}
+          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        >
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
       </div>
     );
   }
@@ -100,6 +108,13 @@ function App() {
       <main className="main-content">
         {renderContent()}
       </main>
+      <button 
+        className="global-theme-toggle" 
+        onClick={toggleTheme}
+        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+      >
+        {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+      </button>
     </div>
   );
 }
