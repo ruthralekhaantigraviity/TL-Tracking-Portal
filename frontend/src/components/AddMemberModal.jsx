@@ -8,8 +8,8 @@ const AddMemberModal = ({ onClose, onSave, defaultTeam = 'HR' }) => {
     const [formData, setFormData] = useState({
         name: '',
         designation: '',
-        domain: defaultTeam === 'SBI' ? 'Sales' : 'Recruitment',
-        team: defaultTeam
+        domain: defaultTeam === 'SBI' ? 'Sales' : defaultTeam === 'BDE' ? 'Field Sales' : 'Recruitment',
+        team: (!defaultTeam || defaultTeam === 'All') ? 'HR' : defaultTeam
     });
 
 
