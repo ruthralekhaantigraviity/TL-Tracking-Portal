@@ -160,13 +160,21 @@ router.put('/:id', auth, async (req, res) => {
         // Auto-calculate historical consistency
         const latest = member.performanceHistory[member.performanceHistory.length - 1];
         if (latest) {
-             // Map counts
+             // Map counts & core fields
              if (updateFields.totalCallsToday !== undefined) latest.calls = Number(updateFields.totalCallsToday);
              if (updateFields.paidCount !== undefined) latest.joinees = Number(updateFields.paidCount);
+             if (updateFields.convertedCalls !== undefined) latest.convertedCalls = Number(updateFields.convertedCalls);
+             if (updateFields.completedTarget !== undefined) latest.completedTarget = Number(updateFields.completedTarget);
+             if (updateFields.callCategory !== undefined) latest.callCategory = updateFields.callCategory;
              
-             // Update SBI fields
+             // Update SBI fields in history
              if (updateFields.panVerified !== undefined) latest.panVerified = Number(updateFields.panVerified);
+             if (updateFields.detailsVerified !== undefined) latest.detailsVerified = Number(updateFields.detailsVerified);
              if (updateFields.approvedCount !== undefined) latest.approvedCount = Number(updateFields.approvedCount);
+             if (updateFields.declinedCount !== undefined) latest.declinedCount = Number(updateFields.declinedCount);
+             if (updateFields.dispatchCompleted !== undefined) latest.dispatchCompleted = Number(updateFields.dispatchCompleted);
+             if (updateFields.callsPicked !== undefined) latest.callsPicked = Number(updateFields.callsPicked);
+             if (updateFields.callsNotPicked !== undefined) latest.callsNotPicked = Number(updateFields.callsNotPicked);
              
              // Update BDE fields in history
              if (updateFields.companyName) latest.companyName = updateFields.companyName;

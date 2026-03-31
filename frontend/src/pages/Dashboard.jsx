@@ -61,7 +61,9 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user 
                     totalPAN,
                     totalDetails,
                     totalApproved,
-                    totalDeclined
+                    totalDeclined,
+                    totalPicked,
+                    totalNotPicked
                 });
             }
         } catch (err) {
