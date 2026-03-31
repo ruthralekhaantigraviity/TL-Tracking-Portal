@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Phone, Users, MessageSquare, TrendingUp, CheckCircle, Target, Briefcase, Edit3, UserPlus, Download, FileText, Clock, ShieldCheck, FileCheck, Truck, ThumbsUp, ThumbsDown, Trash2 } from 'lucide-react';
+import { Phone, Users, MessageSquare, TrendingUp, CheckCircle, Target, Briefcase, Edit3, UserPlus, Download, FileText, Clock, ShieldCheck, FileCheck, Truck, ThumbsUp, ThumbsDown, Trash2, ArrowLeft } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import toast from 'react-hot-toast';
 import '../styles/Dashboard.css';
@@ -345,6 +345,27 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user 
         <div className="dashboard-container">
             <header className="page-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    {selectedTeam === 'Administration' && (
+                        <button 
+                            className="back-nav-btn glass" 
+                            onClick={() => setSelectedTeam('All')}
+                            title="Go back to Global Overview"
+                            style={{
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                color: '#fff',
+                                padding: '10px',
+                                borderRadius: '12px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.3s ease'
+                            }}
+                        >
+                            <ArrowLeft size={20} />
+                        </button>
+                    )}
                     <div className="team-badge" style={{ background: '#6366f1', color: '#fff', padding: '12px', borderRadius: '16px' }}>
                         <Briefcase size={24} />
                     </div>
@@ -352,7 +373,6 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user 
                         <h1>{selectedTeam === 'All' ? 'Global Command Center' : `${selectedTeam} Performance Dashboard`}</h1>
                         <p>{selectedTeam === 'All' ? 'Unified organization-wide performance oversight' : `Managing ${selectedTeam} department activities and daily productivity metrics`}</p>
                     </div>
-
                 </div>
                 <div className="header-actions">
                     {selectedTeam === 'Administration' ? (
