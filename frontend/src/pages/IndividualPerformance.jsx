@@ -3,7 +3,7 @@ import {
     Phone, Users, MessageSquare, Clock, Trophy, 
     Download, ChevronLeft, Briefcase, 
     ArrowUpRight, Target, CheckCircle, User, DollarSign, Activity,
-    ShieldCheck, ThumbsUp, ThumbsDown, Truck, FileCheck
+    ShieldCheck, ThumbsUp, ThumbsDown, Truck, FileCheck, Sun, Moon
 } from 'lucide-react';
 import { 
     XAxis, YAxis, CartesianGrid, 
@@ -12,7 +12,7 @@ import {
 import html2pdf from 'html2pdf.js';
 import '../styles/IndividualPerformance.css';
 
-const IndividualPerformance = ({ member, onBack }) => {
+const IndividualPerformance = ({ member, onBack, theme, toggleTheme }) => {
     const reportRef = useRef();
 
     if (!member) return null;
@@ -27,7 +27,7 @@ const IndividualPerformance = ({ member, onBack }) => {
             margin: 10,
             filename: `${member.name}_Performance_Report.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, backgroundColor: '#0f172a' },
+            html2canvas: { scale: 2, backgroundColor: theme === 'dark' ? '#020617' : '#f8fafc' },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
         html2pdf().from(element).set(opt).save();
@@ -48,6 +48,29 @@ const IndividualPerformance = ({ member, onBack }) => {
                     Back to Team
                 </button>
                 <div className="header-actions">
+                    <button 
+                        className="theme-toggle-btn glass" 
+                        onClick={toggleTheme}
+                        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                        style={{
+                            background: 'rgba(99, 102, 241, 0.1)',
+                            border: '1px solid rgba(99, 102, 241, 0.2)',
+                            color: '#6366f1',
+                            padding: '10px',
+                            borderRadius: '12px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginRight: '15px'
+                        }}
+                    >
+                        {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
+                    <button className="btn-primary" onClick={downloadPDF}>
+                        <Download size={18} />
+                        Download Report
+                    </button>
                 </div>
 
             </header>
@@ -163,7 +186,12 @@ const IndividualPerformance = ({ member, onBack }) => {
                                         <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                                         <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                                         <Tooltip 
-                                            contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                                            contentStyle={{ 
+                                                background: theme === 'dark' ? '#0f172a' : '#ffffff', 
+                                                border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`, 
+                                                borderRadius: '12px',
+                                                color: theme === 'dark' ? '#fff' : '#000'
+                                            }}
                                         />
                                         <Area type="monotone" dataKey="primary" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorPrimary)" />
                                         <Area type="monotone" dataKey="secondary" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorSecondary)" />

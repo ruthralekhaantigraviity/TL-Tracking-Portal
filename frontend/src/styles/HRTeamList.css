@@ -11,8 +11,8 @@
     gap: 1.5rem;
     margin-bottom: 2rem;
     padding: 1rem;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
 }
 
@@ -20,11 +20,11 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-glass);
     padding: 0.5rem 1rem;
     border-radius: 8px;
     flex: 1;
-    border: 1px solid transparent;
+    border: 1px solid var(--border-color);
     transition: all 0.3s ease;
 }
 
@@ -36,7 +36,7 @@
 .search-wrapper input {
     background: transparent;
     border: none;
-    color: #fff;
+    color: var(--text-primary);
     width: 100%;
     outline: none;
     font-size: 0.95rem;
@@ -46,10 +46,10 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-glass);
     padding: 0.5rem 1rem;
     border-radius: 8px;
-    border: 1px solid transparent;
+    border: 1px solid var(--border-color);
     transition: all 0.3s ease;
 }
 
@@ -62,7 +62,7 @@
 .filter-wrapper select {
     background: transparent;
     border: none;
-    color: #fff;
+    color: var(--text-primary);
     outline: none;
     cursor: pointer;
     font-size: 0.95rem;
@@ -70,8 +70,8 @@
 }
 
 .filter-wrapper select option {
-    background-color: #0f172a;
-    color: #fff;
+    background-color: var(--bg-sidebar);
+    color: var(--text-primary);
     padding: 12px;
 }
 
@@ -97,8 +97,8 @@
 
 .member-card:hover {
     transform: translateY(-8px);
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(99, 102, 241, 0.3);
+    background: var(--bg-card);
+    border-color: var(--accent-primary);
 }
 
 .member-avatar {
@@ -134,13 +134,13 @@
 .member-info h3 {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 0.25rem;
 }
 
 .designation {
     font-size: 0.85rem;
-    color: #94a3b8;
+    color: var(--text-secondary);
     margin-bottom: 1rem;
     display: block;
 }
@@ -171,10 +171,11 @@
     align-items: center;
     gap: 6px;
     font-size: 0.85rem;
-    color: #fff;
-    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    background: var(--bg-glass);
     padding: 0.25rem 0.75rem;
     border-radius: 12px;
+    border: 1px solid var(--border-color);
 }
 
 .view-details-btn {

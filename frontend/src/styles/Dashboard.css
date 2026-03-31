@@ -14,12 +14,12 @@
 .page-header h1 {
     font-size: 1.8rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 0.5rem;
 }
 
 .page-header p {
-    color: #94a3b8;
+    color: var(--text-secondary);
     font-size: 0.95rem;
 }
 
@@ -31,8 +31,8 @@
 }
 
 .metric-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 1.5rem;
     transition: all 0.3s ease;
@@ -68,7 +68,7 @@
 .report-controls select {
     background: transparent;
     border: none;
-    color: #e2e8f0;
+    color: var(--text-primary);
     font-size: 13px;
     outline: none;
     cursor: pointer;
@@ -101,7 +101,7 @@
 }
 
 .card-label {
-    color: #94a3b8;
+    color: var(--text-secondary);
     font-size: 0.85rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -111,7 +111,7 @@
 .card-value {
     font-size: 2rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 0.5rem;
 }
 
@@ -142,7 +142,7 @@
 
 .section-header h3 {
     font-size: 1.2rem;
-    color: #fff;
+    color: var(--text-primary);
     font-weight: 600;
 }
 
@@ -165,28 +165,40 @@
 
 .oversight-table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 12px;
+    border-collapse: collapse; /* Changed to collapse for correct lines */
+    margin-top: 1rem;
 }
 
 .oversight-table th {
     text-align: left;
     padding: 0.75rem 1rem;
-    color: #94a3b8;
+    color: var(--text-secondary);
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.025em;
+    border-right: 1px solid var(--border-color);
+}
+
+.oversight-table th:last-child {
+    border-right: none;
 }
 
 .oversight-table td {
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.02);
+    padding: 1.25rem 1rem;
+    background: var(--table-row-bg);
     vertical-align: middle;
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
 }
 
-.oversight-table tr td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
-.oversight-table tr td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
+.oversight-table tr:first-child td {
+    border-top: 1px solid var(--border-color);
+}
+
+.oversight-table td:first-child {
+    border-left: 1px solid var(--border-color);
+}
 
 .member-cell {
     display: flex;
@@ -206,8 +218,8 @@
     color: #fff;
 }
 
-.member-meta .name { display: block; color: #fff; font-weight: 600; font-size: 0.95rem; }
-.member-meta .role { display: block; color: #94a3b8; font-size: 0.75rem; }
+.member-meta .name { display: block; color: var(--text-primary); font-weight: 600; font-size: 0.95rem; }
+.member-meta .role { display: block; color: var(--text-secondary); font-size: 0.75rem; }
 
 .task-cell {
     color: #e2e8f0;

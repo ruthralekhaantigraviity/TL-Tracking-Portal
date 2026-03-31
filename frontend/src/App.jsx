@@ -12,6 +12,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedTeam, setSelectedTeam] = useState('HR'); 
   const [selectedMember, setSelectedMember] = useState(null);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
 
   useEffect(() => {
     // Check if user is already logged in
@@ -34,6 +35,12 @@ function App() {
     setUser(null);
   };
 
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+  };
+
   const handleLoginSuccess = (userData) => {
     setUser(userData);
     if (userData.role === 'Admin' || userData.role === 'Manager') {
@@ -45,10 +52,12 @@ function App() {
 
   if (!user) {
     return (
-      <>
+      <div className={`theme-wrapper ${theme}-theme`}>
         <Toaster position="top-right" />
-        <Login onLoginSuccess={handleLoginSuccess} />
-      </>
+        <div className="login-wrapper">
+          <Login onLoginSuccess={handleLoginSuccess} theme={theme} toggleTheme={toggleTheme} />
+        </div>
+      </div>
     );
   }
 
@@ -58,24 +67,25 @@ function App() {
         <IndividualPerformance 
           member={selectedMember} 
           onBack={() => setSelectedMember(null)} 
+          theme={theme}
         />
       );
     }
 
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard viewMode="overview" selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} user={user} />;
+        return <Dashboard viewMode="overview" selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} user={user} theme={theme} toggleTheme={toggleTheme} />;
       case 'hr-team':
-        return <HRTeamList onSelectMember={(member) => setSelectedMember(member)} selectedTeam={selectedTeam} />;
+        return <HRTeamList onSelectMember={(member) => setSelectedMember(member)} selectedTeam={selectedTeam} theme={theme} />;
       case 'profile':
-        return <Dashboard viewMode="performance" selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} user={user} />;
+        return <Dashboard viewMode="performance" selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} user={user} theme={theme} toggleTheme={toggleTheme} />;
       default:
-        return <Dashboard viewMode="overview" selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} user={user} />;
+        return <Dashboard viewMode="overview" selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} user={user} theme={theme} toggleTheme={toggleTheme} />;
     }
   };
 
   return (
-    <div className="app-container">
+    <div className={`app-container ${theme}-theme`}>
       <Toaster position="top-right" reverseOrder={false} />
       <Sidebar 
         activeTab={activeTab} 

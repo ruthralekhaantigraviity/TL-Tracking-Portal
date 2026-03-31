@@ -1,8 +1,8 @@
 .sidebar {
     width: 260px;
     height: 100vh;
-    background: rgba(18, 18, 18, 0.95);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     padding: 2rem 1.5rem;
@@ -36,9 +36,7 @@
 .sidebar-logo h2 {
     font-size: 1.25rem;
     font-weight: 700;
-    background: linear-gradient(to right, #fff, #94a3b8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
 }
 
 .sidebar-nav {
@@ -56,7 +54,7 @@
     border-radius: 12px;
     background: transparent;
     border: none;
-    color: #94a3b8;
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -64,8 +62,8 @@
 }
 
 .nav-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
+    background: var(--bg-glass);
+    color: var(--text-primary);
     transform: translateX(4px);
 }
 

@@ -4,7 +4,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: #0f172a; 
+    background: rgba(0, 0, 0, 0.4); 
+    backdrop-filter: blur(8px);
     display: flex;
     align-items: stretch; /* Stretch to fill */
     justify-content: center;
@@ -14,7 +15,7 @@
 
 
 .modal-content {
-    background: #0f172a;
+    background: var(--bg-sidebar);
     width: 100vw;
     height: 100vh;
     display: flex;
@@ -72,7 +73,7 @@
 
 .header-title h2 {
     font-size: 1.5rem;
-    color: #fff;
+    color: var(--text-primary);
     margin: 0;
 }
 
@@ -114,7 +115,7 @@
 
 .form-group label {
     font-size: 0.85rem;
-    color: #94a3b8;
+    color: var(--text-secondary);
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -122,11 +123,11 @@
 }
 
 .form-group input {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 0.75rem 1rem;
-    color: #fff;
+    color: var(--text-primary);
     font-size: 0.95rem;
     outline: none;
     transition: all 0.2s;
@@ -141,12 +142,11 @@
     display: flex;
     justify-content: center;
     gap: 2rem;
-    margin-top: 1rem;
     padding: 1.5rem 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    background: #0f172a;
-    position: sticky; /* Make it sticky */
-    bottom: -1px; /* Stick to bottom */
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-sidebar);
+    position: sticky; 
+    bottom: -1px; 
     z-index: 10;
 }
 
@@ -156,8 +156,8 @@
 
 .btn-secondary {
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #fff;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
     padding: 0.75rem 1.5rem;
     border-radius: 12px;
     cursor: pointer;
@@ -249,7 +249,7 @@
 }
 
 .admin-textarea:focus {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-glass);
     border-color: #6366f1;
     box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
 }

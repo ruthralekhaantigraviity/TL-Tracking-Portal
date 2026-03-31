@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Phone, Users, MessageSquare, TrendingUp, CheckCircle, Target, Briefcase, Edit3, UserPlus, Download, FileText, Clock, ShieldCheck, FileCheck, Truck, ThumbsUp, ThumbsDown, Trash2, ArrowLeft } from 'lucide-react';
+import { Phone, Users, MessageSquare, TrendingUp, CheckCircle, Target, Briefcase, Edit3, UserPlus, Download, FileText, Clock, ShieldCheck, FileCheck, Truck, ThumbsUp, ThumbsDown, Trash2, ArrowLeft, Sun, Moon } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import toast from 'react-hot-toast';
 import '../styles/Dashboard.css';
@@ -8,7 +8,7 @@ import StatsEntryModal from '../components/StatsEntryModal';
 import AddMemberModal from '../components/AddMemberModal';
 import TeamPerformanceChart from '../components/TeamPerformanceChart';
 
-const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user }) => {
+const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user, theme, toggleTheme }) => {
     const [members, setMembers] = useState([]);
     const [stats, setStats] = useState({
         totalCalls: 0,
@@ -375,6 +375,26 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user 
                     </div>
                 </div>
                 <div className="header-actions">
+                    <button 
+                        className="theme-toggle-btn glass" 
+                        onClick={toggleTheme}
+                        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                        style={{
+                            background: 'rgba(99, 102, 241, 0.1)',
+                            border: '1px solid rgba(99, 102, 241, 0.2)',
+                            color: '#6366f1',
+                            padding: '10px',
+                            borderRadius: '12px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginRight: '10px'
+                        }}
+                    >
+                        {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
+
                     {selectedTeam === 'Administration' ? (
                          <div className="report-selector-group" style={{ display: 'flex', gap: '15px' }}>
                              <div className="report-controls">
