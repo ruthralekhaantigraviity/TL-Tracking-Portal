@@ -76,8 +76,8 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
-// @route   POST /api/hr/seed-users
-router.post('/seed-users', async (req, res) => {
+// @route   GET /api/hr/seed-users
+router.get('/seed-users', async (req, res) => {
     try {
         await User.deleteMany({});
         const users = await User.create([
@@ -93,8 +93,8 @@ router.post('/seed-users', async (req, res) => {
     }
 });
 
-// @route   POST /api/hr/seed
-router.post('/seed', async (req, res) => {
+// @route   GET /api/hr/seed
+router.get('/seed', async (req, res) => {
     try {
         await HRMember.deleteMany({});
         const members = await HRMember.create([
