@@ -152,7 +152,7 @@ const StatsEntryModal = ({ member, onClose, onSave, user }) => {
                                         onFocus={(e) => e.target.select()}
                                         placeholder="Count"
                                         readOnly={isSBITEAM}
-                                        style={isSBITEAM ? { background: 'rgba(99, 102, 241, 0.05)', cursor: 'not-allowed' } : {}}
+                                        style={isSBITEAM ? { background: 'var(--bg-glass)', cursor: 'not-allowed' } : {}}
                                     />
 
                                     <input 
@@ -391,11 +391,11 @@ const StatsEntryModal = ({ member, onClose, onSave, user }) => {
                                     placeholder="Reasons for decline, feedback, suggestions..." 
                                     rows={2} 
                                     style={{
-                                        background: 'rgba(255, 255, 255, 0.05)',
-                                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                                        background: 'var(--bg-glass)',
+                                        border: '1px solid var(--border-color)',
                                         borderRadius: '12px',
                                         padding: '0.75rem 1rem',
-                                        color: '#fff',
+                                        color: 'var(--text-primary)',
                                         fontSize: '0.95rem',
                                         outline: 'none',
                                         width: '100%',

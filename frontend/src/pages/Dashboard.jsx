@@ -392,14 +392,16 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                             <select 
                                 value={selectedTeam} 
                                 onChange={(e) => setSelectedTeam(e.target.value)} 
-                                style={{ 
-                                    background: 'transparent', 
-                                    border: 'none', 
-                                    color: '#fff', 
-                                    fontWeight: '600', 
-                                    outline: 'none', 
-                                    cursor: 'pointer',
-                                    fontSize: '0.9rem'
+                                style={{
+                                    background: 'var(--bg-glass)',
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '12px',
+                                    padding: '0.75rem 1rem',
+                                    color: 'var(--text-primary)',
+                                    fontSize: '0.95rem',
+                                    outline: 'none',
+                                    width: '100%',
+                                    resize: 'vertical'
                                 }}
                             >
                                 <option value="All" style={{ background: '#0f172a' }}>Global Overview</option>
@@ -414,7 +416,7 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
 
 
 
-                    {selectedTeam !== 'Administration' && (
+                    {selectedTeam !== 'Administration' && (user.role === 'Admin' || user.role === 'Manager' || user.role === 'TL') && (
                         viewMode === 'overview' ? (
                             <button className="btn-primary" onClick={() => setIsAddModalOpen(true)}>
                                 <UserPlus size={18} />
@@ -789,12 +791,16 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                                             </td>
                                             <td>
                                                 <div style={{ display: 'flex', gap: '8px' }}>
-                                                    <button className="action-btn" onClick={() => handleUpdateClick(member)}>
-                                                        <Edit3 size={16} /> Update
-                                                    </button>
-                                                    <button className="action-btn delete" onClick={() => handleDeleteMember(member._id, member.name)} style={{ background: '#fee2e2', color: '#ef4444', border: '1px solid #fecaca' }}>
-                                                        <Trash2 size={16} />
-                                                    </button>
+                                                    {(user.role === 'Admin' || user.role === 'Manager' || user.role === 'TL') && (
+                                                        <>
+                                                            <button className="action-btn" onClick={() => handleUpdateClick(member)}>
+                                                                <Edit3 size={16} /> Update
+                                                            </button>
+                                                            <button className="action-btn delete" onClick={() => handleDeleteMember(member._id, member.name)}>
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
