@@ -6,7 +6,6 @@ import Dashboard from './pages/Dashboard';
 import HRTeamList from './pages/HRTeamList';
 import IndividualPerformance from './pages/IndividualPerformance';
 import Login from './pages/Login';
-import Register from './pages/Register';
 import { seedData } from './api/api';
 
 function App() {
@@ -15,7 +14,6 @@ function App() {
   const [selectedTeam, setSelectedTeam] = useState('HR'); 
   const [selectedMember, setSelectedMember] = useState(null);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
-  const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
     // Check if user is already logged in with a valid token
@@ -69,19 +67,11 @@ function App() {
       <div className={`theme-wrapper ${theme}-theme`}>
         <Toaster position="top-right" />
         <div className="login-wrapper">
-          {isRegistering ? (
-            <Register 
-              onRegisterSuccess={handleLoginSuccess} 
-              onBackToLogin={() => setIsRegistering(false)} 
-            />
-          ) : (
-            <Login 
-              onLoginSuccess={handleLoginSuccess} 
-              onRegisterClick={() => setIsRegistering(true)} 
-              theme={theme} 
-              toggleTheme={toggleTheme} 
-            />
-          )}
+          <Login 
+            onLoginSuccess={handleLoginSuccess} 
+            theme={theme} 
+            toggleTheme={toggleTheme} 
+          />
         </div>
         <button 
           className="global-theme-toggle" 

@@ -4,7 +4,7 @@ import { login } from '../api/api';
 import toast from 'react-hot-toast';
 import '../styles/Login.css';
 
-const Login = ({ onLoginSuccess, onRegisterClick }) => {
+const Login = ({ onLoginSuccess }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -67,7 +67,6 @@ const Login = ({ onLoginSuccess, onRegisterClick }) => {
         </form>
 
         <footer className="login-footer">
-          <p>Don't have an account? <span className="register-link-btn" onClick={onRegisterClick}>Register Now</span></p>
           <p className="copyright">© {new Date().getFullYear()} Forge India Connect</p>
         </footer>
       </div>
