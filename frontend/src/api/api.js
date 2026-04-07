@@ -13,11 +13,12 @@ const getAuthHeaders = () => {
 axios.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response && error.response.status === 401) {
+        const isAuthRequest = error.config && (error.config.url.endsWith('/login') || error.config.url.endsWith('/register'));
+        
+        if (error.response && error.response.status === 401 && !isAuthRequest) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             toast.error('Session expired. Please log in again.');
-            // Let the app re-render and redirect to login
             window.location.reload();
         }
         return Promise.reject(error);
