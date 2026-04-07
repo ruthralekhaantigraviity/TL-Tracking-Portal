@@ -11,24 +11,13 @@ const Register = ({ onRegisterSuccess, onBackToLogin }) => {
         name: '',
         role: 'TL',
         designation: '',
-        assignedTeam: 'HR'
+        assignedTeam: 'All'
     });
     const [teams, setTeams] = useState([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        const getTeams = async () => {
-            try {
-                const data = await fetchTeams();
-                setTeams(data);
-                if (data.length > 0) {
-                    setFormData(prev => ({ ...prev, assignedTeam: data[0].name }));
-                }
-            } catch (err) {
-                console.error('Failed to fetch teams:', err);
-            }
-        };
-        getTeams();
+        // Teams fetching removed as per manual assignment requirement
     }, []);
 
     const handleChange = (e) => {
@@ -40,11 +29,9 @@ const Register = ({ onRegisterSuccess, onBackToLogin }) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const data = await register(formData);
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-            toast.success(`Account created! Welcome, ${data.user.name}`);
-            onRegisterSuccess(data.user);
+            await register(formData);
+            toast.success(`Account created! Please sign in.`);
+            onBackToLogin();
         } catch (err) {
             toast.error(err.response?.data?.message || 'Registration failed. Please check your inputs.');
         } finally {
@@ -100,7 +87,7 @@ const Register = ({ onRegisterSuccess, onBackToLogin }) => {
                         />
                     </div>
 
-                    <div className="input-group">
+                    <div className="input-group full-width">
                         <label><Briefcase size={16} /> Designation</label>
                         <input 
                             name="designation"
@@ -112,27 +99,8 @@ const Register = ({ onRegisterSuccess, onBackToLogin }) => {
                         />
                     </div>
 
-                    <div className="input-group">
-                        <label><ShieldCheck size={16} /> Access Role</label>
-                        <select name="role" value={formData.role} onChange={handleChange}>
-                            <option value="TL">Team Leader (TL)</option>
-                            <option value="Manager">Operations Manager</option>
-                            <option value="Admin">Portal Administrator</option>
-                        </select>
-                    </div>
-
-                    <div className="input-group">
-                        <label><Users size={16} /> Assigned Team</label>
-                        <select name="assignedTeam" value={formData.assignedTeam} onChange={handleChange}>
-                            <option value="All">All Operations</option>
-                            {teams.map(team => (
-                                <option key={team._id} value={team.name}>{team.name} Department</option>
-                            ))}
-                        </select>
-                    </div>
-
                     <button type="submit" className="register-btn" disabled={loading}>
-                        {loading ? 'Initializing...' : 'Create Account & Sign In'}
+                        {loading ? 'Initializing...' : 'Create Account'}
                         <ArrowRight size={20} />
                     </button>
 
