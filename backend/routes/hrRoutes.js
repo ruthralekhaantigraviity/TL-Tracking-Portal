@@ -57,9 +57,12 @@ router.post('/login', async (req, res) => {
 });
 
 // @route   POST /api/hr/register
-// @desc    Register a new user
-router.post('/register', async (req, res) => {
+// @desc    Register a new user (Admin/Manager only)
+router.post('/register', auth, async (req, res) => {
     try {
+        if (req.user.role !== 'Admin' && req.user.role !== 'Manager') {
+            return res.status(403).json({ message: 'Only Admins and Managers can create accounts' });
+        }
         const { username, password, name, role, designation, assignedTeam } = req.body;
         
         // Check if username already exists

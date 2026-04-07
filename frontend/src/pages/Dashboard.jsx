@@ -7,6 +7,7 @@ import { fetchMembers, updateMember, createMember, deleteMember, deleteTeam, see
 import StatsEntryModal from '../components/StatsEntryModal';
 import AddMemberModal from '../components/AddMemberModal';
 import AddTeamModal from '../components/AddTeamModal';
+import AddUserModal from '../components/AddUserModal';
 import TeamPerformanceChart from '../components/TeamPerformanceChart';
 
 const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user, theme, toggleTheme }) => {
@@ -28,6 +29,7 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isAddTeamModalOpen, setIsAddTeamModalOpen] = useState(false);
+    const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
     const [teams, setTeams] = useState([]);
     const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
     const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
@@ -506,6 +508,14 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
 
 
 
+
+                    {(user.role === 'Admin' || user.role === 'Manager') && (
+                        <div className="admin-actions-group" style={{ display: 'flex', gap: '12px', marginRight: '12px' }}>
+                            <button className="btn-primary" onClick={() => setIsAddUserModalOpen(true)}>
+                                <UserPlus size={18} /> Add Account
+                            </button>
+                        </div>
+                    )}
 
                     {selectedTeam !== 'Administration' && (user.role === 'Admin' || user.role === 'Manager' || user.role === 'TL') && (
                         <div className="action-center-group" style={{ display: 'flex', gap: '12px' }}>
@@ -1147,6 +1157,14 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                     teams={teams}
                 />
             )}
+
+            <AddUserModal 
+                isOpen={isAddUserModalOpen} 
+                onClose={() => setIsAddUserModalOpen(false)} 
+                onUserAdded={() => {
+                    // Update stats or just toast (toast handled in modal)
+                }}
+            />
         </div>
     );
 };

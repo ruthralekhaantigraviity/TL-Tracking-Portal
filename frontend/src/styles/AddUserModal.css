@@ -1,0 +1,114 @@
+.add-user-modal {
+    max-width: 700px;
+    width: 90%;
+}
+
+.user-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.user-form .full-width {
+    grid-column: span 2;
+}
+
+.user-form .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.user-form .input-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-form .input-group input,
+.user-form .input-group select {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.user-form .input-group select option {
+    background: var(--bg-sidebar);
+    color: var(--text-primary);
+}
+
+.user-form .input-group input:focus,
+.user-form .input-group select:focus {
+    border-color: var(--accent-primary);
+    background: var(--bg-glass-heavy);
+}
+
+.modal-footer {
+    grid-column: span 2;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.cancel-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.submit-btn {
+    padding: 0.75rem 2rem;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -10px var(--accent-primary);
+}
+
+.submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@media (max-width: 640px) {
+    .user-form {
+        grid-template-columns: 1fr;
+    }
+    .user-form .full-width {
+        grid-column: span 1;
+    }
+}
