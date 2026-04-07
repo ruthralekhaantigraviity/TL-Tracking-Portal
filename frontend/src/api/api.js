@@ -3,16 +3,23 @@ import toast from 'react-hot-toast';
 
 const API_URL = '/api/hr';
 
-// Helper to get token
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
-};
+// Add interceptor to attach token to every request
+axios.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
 
 // Add interceptor to handle 401 errors globally
 axios.interceptors.response.use(
     (response) => response,
     (error) => {
+        // Don't trigger "Session expired" for login/register attempts themselves
         const isAuthRequest = error.config && (error.config.url.endsWith('/login') || error.config.url.endsWith('/register'));
         
         if (error.response && error.response.status === 401 && !isAuthRequest) {
@@ -37,9 +44,7 @@ export const login = async (username, password) => {
 
 export const register = async (userData) => {
     try {
-        const response = await axios.post(`${API_URL}/register`, userData, {
-            headers: getAuthHeaders()
-        });
+        const response = await axios.post(`${API_URL}/register`, userData);
         return response.data;
     } catch (error) {
         console.error('Registration error:', error);
@@ -49,9 +54,7 @@ export const register = async (userData) => {
 
 export const fetchTeams = async () => {
     try {
-        const response = await axios.get(`${API_URL}/teams`, {
-            headers: getAuthHeaders()
-        });
+        const response = await axios.get(`${API_URL}/teams`);
         return response.data;
     } catch (error) {
         console.error('Error fetching teams:', error);
@@ -62,8 +65,7 @@ export const fetchTeams = async () => {
 export const fetchMembers = async (team) => {
     try {
         const response = await axios.get(API_URL, { 
-            params: { team },
-            headers: getAuthHeaders()
+            params: { team }
         });
         return response.data;
     } catch (error) {
@@ -74,9 +76,7 @@ export const fetchMembers = async (team) => {
 
 export const fetchMemberById = async (id) => {
     try {
-        const response = await axios.get(`${API_URL}/${id}`, {
-            headers: getAuthHeaders()
-        });
+        const response = await axios.get(`${API_URL}/${id}`);
         return response.data;
     } catch (error) {
         console.error('Error fetching member:', error);
@@ -98,9 +98,7 @@ export const seedData = async () => {
 
 export const updateMember = async (id, data) => {
     try {
-        const response = await axios.put(`${API_URL}/${id}`, data, {
-            headers: getAuthHeaders()
-        });
+        const response = await axios.put(`${API_URL}/${id}`, data);
         return response.data;
     } catch (error) {
         console.error('Error updating member:', error);
@@ -110,9 +108,7 @@ export const updateMember = async (id, data) => {
 
 export const createMember = async (data) => {
     try {
-        const response = await axios.post(API_URL, data, {
-            headers: getAuthHeaders()
-        });
+        const response = await axios.post(API_URL, data);
         return response.data;
     } catch (error) {
         console.error('Error creating member:', error);
@@ -122,9 +118,7 @@ export const createMember = async (data) => {
 
 export const deleteMember = async (id) => {
     try {
-        const response = await axios.delete(`${API_URL}/${id}`, {
-            headers: getAuthHeaders()
-        });
+        const response = await axios.delete(`${API_URL}/${id}`);
         return response.data;
     } catch (error) {
         console.error('Error deleting member:', error);
@@ -134,9 +128,7 @@ export const deleteMember = async (id) => {
 
 export const deleteTeam = async (id) => {
     try {
-        const response = await axios.delete(`${API_URL}/teams/${id}`, {
-            headers: getAuthHeaders()
-        });
+        const response = await axios.delete(`${API_URL}/teams/${id}`);
         return response.data;
     } catch (error) {
         console.error('Error deleting team:', error);
