@@ -11,14 +11,26 @@ const JWT_SECRET = 'forge-india-secret-2024';
 // Middleware to verify JWT
 const auth = async (req, res, next) => {
     try {
-        const token = req.header('Authorization')?.replace('Bearer ', '');
-        if (!token) throw new Error();
+        const authHeader = req.header('Authorization');
+        const token = authHeader?.replace('Bearer ', '');
+        
+        if (!token) {
+            console.log('Auth failed: No token provided');
+            throw new Error('No token provided');
+        }
+        
         const decoded = jwt.verify(token, JWT_SECRET);
         const user = await User.findById(decoded._id);
-        if (!user) throw new Error();
+        
+        if (!user) {
+            console.log(`Auth failed: User not found for ID ${decoded._id}`);
+            throw new Error('User not found');
+        }
+        
         req.user = user;
         next();
     } catch (e) {
+        console.log(`Auth middleware error: ${e.message}`);
         res.status(401).json({ message: 'Session expired. Please log in again.', details: e.message });
     }
 };
