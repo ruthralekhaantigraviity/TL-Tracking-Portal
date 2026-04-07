@@ -581,7 +581,24 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                     </div>
 
                     <div className="log-actions">
-                        <p className="log-hint">All entries are securely stored in the executive database.</p>
+                        <div className="admin-guidance-card glass" style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '15px',
+                            background: 'rgba(99, 102, 241, 0.1)',
+                            border: '1px solid rgba(99, 102, 241, 0.2)',
+                            padding: '15px 20px',
+                            borderRadius: '16px',
+                            color: 'var(--text-primary)',
+                            fontSize: '0.9rem',
+                            flex: 1
+                        }}>
+                            <ShieldCheck size={24} style={{ color: '#6366f1' }} />
+                            <div>
+                                <strong style={{ display: 'block', color: '#6366f1', marginBottom: '2px' }}>Administrative Policy</strong>
+                                <p style={{ margin: 0, opacity: 0.8 }}>External registration is disabled. Only the Portal Administrator can generate login credentials via the <strong>Add Account</strong> tool above.</p>
+                            </div>
+                        </div>
                         <button 
                             className="btn-primary save-log-btn" 
                             disabled={isAdminSubmitting}
