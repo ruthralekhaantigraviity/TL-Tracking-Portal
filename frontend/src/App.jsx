@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import HRTeamList from './pages/HRTeamList';
 import IndividualPerformance from './pages/IndividualPerformance';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import { seedData } from './api/api';
 
 function App() {
@@ -14,19 +15,31 @@ function App() {
   const [selectedTeam, setSelectedTeam] = useState('HR'); 
   const [selectedMember, setSelectedMember] = useState(null);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+  const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
-    // Check if user is already logged in
+    // Check if user is already logged in with a valid token
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-      // Auto-set team for TLs, default to 'All' for Admin/Manager
-      if (parsedUser.role === 'TL') {
-        setSelectedTeam(parsedUser.assignedTeam);
-      } else if (parsedUser.role === 'Admin' || parsedUser.role === 'Manager') {
-        setSelectedTeam('All');
+    const token = localStorage.getItem('token');
+    
+    if (storedUser && token) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        
+        // Restore context based on role
+        if (parsedUser.role === 'TL') {
+          setSelectedTeam(parsedUser.assignedTeam);
+        } else if (parsedUser.role === 'Admin' || parsedUser.role === 'Manager') {
+          setSelectedTeam('All');
+        }
+      } catch (err) {
+        console.error('Session restoration failed:', err);
+        handleLogout();
       }
+    } else if (storedUser || token) {
+      // Partial session detected, clear it
+      handleLogout();
     }
   }, []);
 
@@ -56,7 +69,19 @@ function App() {
       <div className={`theme-wrapper ${theme}-theme`}>
         <Toaster position="top-right" />
         <div className="login-wrapper">
-          <Login onLoginSuccess={handleLoginSuccess} theme={theme} toggleTheme={toggleTheme} />
+          {isRegistering ? (
+            <Register 
+              onRegisterSuccess={handleLoginSuccess} 
+              onBackToLogin={() => setIsRegistering(false)} 
+            />
+          ) : (
+            <Login 
+              onLoginSuccess={handleLoginSuccess} 
+              onRegisterClick={() => setIsRegistering(true)} 
+              theme={theme} 
+              toggleTheme={toggleTheme} 
+            />
+          )}
         </div>
         <button 
           className="global-theme-toggle" 

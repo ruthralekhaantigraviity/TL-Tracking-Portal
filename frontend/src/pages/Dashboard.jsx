@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Phone, Users, MessageSquare, TrendingUp, CheckCircle, Target, Briefcase, Edit3, UserPlus, Download, FileText, Clock, ShieldCheck, FileCheck, Truck, ThumbsUp, ThumbsDown, Trash2, ArrowLeft, Sun, Moon } from 'lucide-react';
+import { Phone, Users, MessageSquare, TrendingUp, CheckCircle, Target, Briefcase, User, DollarSign, AlertTriangle, Edit3, UserPlus, Download, FileText, Clock, ShieldCheck, FileCheck, Truck, ThumbsUp, ThumbsDown, Trash2, ArrowLeft, Sun, Moon, Plus } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import toast from 'react-hot-toast';
 import '../styles/Dashboard.css';
-import { fetchMembers, updateMember, createMember, deleteMember } from '../api/api';
+import { fetchMembers, updateMember, createMember, deleteMember, deleteTeam, seedData } from '../api/api';
 import StatsEntryModal from '../components/StatsEntryModal';
 import AddMemberModal from '../components/AddMemberModal';
+import AddTeamModal from '../components/AddTeamModal';
 import TeamPerformanceChart from '../components/TeamPerformanceChart';
 
 const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user, theme, toggleTheme }) => {
@@ -26,6 +27,10 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
     const [selectedMember, setSelectedMember] = useState(null);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isAddTeamModalOpen, setIsAddTeamModalOpen] = useState(false);
+    const [teams, setTeams] = useState([]);
+    const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+    const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
     const [reportType, setReportType] = useState('daily');
     const [adminComment, setAdminComment] = useState('');
@@ -38,32 +43,29 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
             const data = await fetchMembers(selectedTeam);
             if (data) {
                 setMembers(data);
-                const totalCalls = data.reduce((acc, curr) => acc + (curr.totalCalls || 0), 0);
-                const totalConverted = data.reduce((acc, curr) => acc + (curr.convertedCalls || 0), 0);
                 
-                const totalPAN = data.reduce((acc, curr) => acc + (curr.panVerified || 0), 0);
-                const totalDetails = data.reduce((acc, curr) => acc + (curr.detailsVerified || 0), 0);
-                const totalApproved = data.reduce((acc, curr) => acc + (curr.approvedCount || 0), 0);
-                const totalDeclined = data.reduce((acc, curr) => acc + (curr.declinedCount || 0), 0);
-                const totalPicked = data.reduce((acc, curr) => acc + (curr.totalCallsPicked || 0), 0);
-                const totalNotPicked = data.reduce((acc, curr) => acc + (curr.totalCallsNotPicked || 0), 0);
+                const filteredHistory = data.map(m => {
+                    const entries = (m.performanceHistory || []).filter(h => {
+                        const hDate = new Date(h.date).toISOString().split('T')[0];
+                        return hDate >= startDate && hDate <= endDate;
+                    });
+                    return { ...m, currentHistory: entries };
+                });
 
-                const avgTarget = data.length > 0 ? Math.round(data.reduce((acc, curr) => {
-                    const target = curr.dailyTarget || 1;
-                    return acc + ((curr.completedTarget || 0) / target * 100);
-                }, 0) / data.length) : 0;
+                const totalCalls = filteredHistory.reduce((acc, m) => acc + m.currentHistory.reduce((s, h) => s + (h.calls || 0), 0), 0);
+                const totalConverted = filteredHistory.reduce((acc, m) => acc + m.currentHistory.reduce((s, h) => s + (h.convertedCalls || 0), 0), 0);
+                
+                const avgTarget = filteredHistory.length > 0 ? Math.round(filteredHistory.reduce((acc, m) => {
+                    if (m.currentHistory.length === 0) return acc;
+                    const hAcc = m.currentHistory.reduce((s, h) => s + ((h.completedTarget || 0) / (h.dailyTarget || 1) * 100), 0);
+                    return acc + (hAcc / m.currentHistory.length);
+                }, 0) / filteredHistory.length) : 0;
                 
                 setStats({
                     totalCalls,
                     totalConverted,
                     avgTarget,
-                    activeHrCount: data.length,
-                    totalPAN,
-                    totalDetails,
-                    totalApproved,
-                    totalDeclined,
-                    totalPicked,
-                    totalNotPicked
+                    activeHrCount: data.length
                 });
             }
         } catch (err) {
@@ -71,10 +73,26 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
         }
     };
 
+    const getTeams = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/hr/teams', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setTeams(data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch teams:', err);
+        }
+    };
+
     useEffect(() => {
         getStats();
+        getTeams();
         if (selectedTeam === 'Administration') getAdminActivity();
-    }, [selectedTeam, selectedDate]); 
+    }, [selectedTeam, startDate, endDate]); 
 
     const getAdminActivity = async () => {
         try {
@@ -170,30 +188,15 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
     };
 
     const getReportRows = () => {
-        const targetDate = new Date(selectedDate);
-        const endOfDay = new Date(targetDate);
-        endOfDay.setHours(23, 59, 59, 999);
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
         
         return members.map(m => {
-            let history = [];
-            const toDateStr = (d) => new Date(d).toISOString().split('T')[0];
-            const targetStr = toDateStr(targetDate);
-
-            if (reportType === 'daily') {
-                history = m.performanceHistory.filter(h => toDateStr(h.date) === targetStr);
-            } else if (reportType === 'weekly') {
-                const startDate = new Date(targetDate);
-                startDate.setDate(startDate.getDate() - 7);
-                history = m.performanceHistory.filter(h => {
-                    const d = new Date(h.date);
-                    return d >= startDate && d <= endOfDay;
-                });
-            } else if (reportType === 'monthly') {
-                history = m.performanceHistory.filter(h => {
-                    const d = new Date(h.date);
-                    return d.getMonth() === targetDate.getMonth() && d.getFullYear() === targetDate.getFullYear();
-                });
-            }
+            const history = (m.performanceHistory || []).filter(h => {
+                const d = new Date(h.date);
+                return d >= start && d <= end;
+            });
             
             const getUnique = (arr, key) => {
                 const unique = [...new Set(arr.map(h => h[key]).filter(v => v && v !== '-'))];
@@ -205,28 +208,24 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                 name: m.name,
                 designation: m.designation,
                 aggCalls: history.reduce((s, h) => s + (h.calls || 0), 0),
-                aggCallCat: getUnique(history, 'callCategory'),
                 aggConverted: history.reduce((s, h) => s + (h.convertedCalls || 0), 0),
-                aggConvSector: getUnique(history, 'conversionSector'),
-                aggPaid: history.reduce((s, h) => s + (h.joinees || 0), 0),
-                aggPaidSector: getUnique(history, 'paidSector'),
-                aggComplaints: history.reduce((s, h) => s + (h.complaints || 0), 0),
-                aggCompReason: getUnique(history, 'complaintReason'),
+                aggVisits: history.reduce((s, h) => s + (h.officeVisits || 0), 0),
+                aggInterview: history.reduce((s, h) => s + (h.underInterview || 0), 0),
+                aggPayment: history.reduce((s, h) => s + (h.paymentProgress || 0), 0),
+                aggPartial: history.reduce((s, h) => s + (h.partialPaid || 0), 0),
+                aggJoined: history.reduce((s, h) => s + (h.joinedCompany || 0), 0),
+                aggRNR: history.reduce((s, h) => s + (h.rnr || 0), 0),
+                aggOD: history.reduce((s, h) => s + (h.od || 0), 0),
+                aggProcessing: history.reduce((s, h) => s + (h.cardProcessing || 0), 0),
+                aggReceived: history.reduce((s, h) => s + (h.cardReceived || 0), 0),
+                aggInsConverted: history.reduce((s, h) => s + (h.insuranceConverted || 0), 0),
+                aggInsPartial: history.reduce((s, h) => s + (h.partialPaymentDone || 0), 0),
+                aggInsFull: history.reduce((s, h) => s + (h.fullyPaid || 0), 0),
                 aggComments: getUnique(history, 'comments'),
                 aggTarget: history.length > 0 
-                    ? Math.round((history.reduce((s, h) => s + (h.completedTarget || 0), 0) / (history.length * (m.dailyTarget || 1))) * 100) 
-                    : 0,
-                aggPAN: history.reduce((s, h) => s + (h.panVerified || 0), 0),
-                aggDetails: history.reduce((s, h) => s + (h.detailsVerified || 0), 0),
-                aggApproved: history.reduce((s, h) => s + (h.approvedCount || 0), 0),
-                aggDeclined: history.reduce((s, h) => s + (h.declinedCount || 0), 0),
-                aggDispatch: history.reduce((s, h) => s + (h.dispatchCompleted || 0), 0),
-                aggPicked: history.reduce((s, h) => s + (h.callsPicked || 0), 0),
-                aggNotPicked: history.reduce((s, h) => s + (h.callsNotPicked || 0), 0),
-                companyName: m.companyName || '-',
-                rolePosition: m.rolePosition || '-'
+                    ? Math.round(history.reduce((s, h) => s + ((h.completedTarget || 0) / (h.dailyTarget || 1) * 100), 0) / history.length) 
+                    : 0
             };
-
         });
     };
 
@@ -237,15 +236,8 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
             totalCalls: rows.reduce((s, r) => s + (r.aggCalls || 0), 0),
             totalConverted: rows.reduce((s, r) => s + (r.aggConverted || 0), 0),
             avgTarget: rows.length > 0 ? Math.round(rows.reduce((s, r) => s + (r.aggTarget || 0), 0) / rows.length) : 0,
-            activeHrCount: rows.length,
-            totalPAN: rows.reduce((s, r) => s + (r.aggPAN || 0), 0),
-            totalDetails: rows.reduce((s, r) => s + (r.aggDetails || 0), 0),
-            totalApproved: rows.reduce((s, r) => s + (r.aggApproved || 0), 0),
-            totalDeclined: rows.reduce((s, r) => s + (r.aggDeclined || 0), 0),
-            totalPicked: rows.reduce((s, r) => s + (r.aggPicked || 0), 0),
-            totalNotPicked: rows.reduce((s, r) => s + (r.aggNotPicked || 0), 0)
+            activeHrCount: rows.length
         };
-
     };
 
     const reportStats = getReportStats(reportRows);
@@ -278,6 +270,44 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
             console.error('Failed to create member:', err);
             const errorMsg = err.response?.data?.details || err.response?.data?.message || err.message || 'Error creating member';
             toast.error(errorMsg);
+        }
+    };
+
+    const handleAddTeam = async (newTeamData) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/hr/teams', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(newTeamData)
+            });
+            if (res.ok) {
+                toast.success('Team created successfully!');
+                setIsAddTeamModalOpen(false);
+                getTeams();
+            } else {
+                const data = await res.json();
+                toast.error(data.message || 'Failed to create team');
+            }
+        } catch (err) {
+            console.error('Failed to create team:', err);
+            toast.error('Network error creating team');
+        }
+    };
+
+    const handleSeedData = async () => {
+        const loadingToast = toast.loading('Seeding portal data...');
+        try {
+            await seedData();
+            toast.success('Portal seeded with test data!', { id: loadingToast });
+            getStats();
+            getTeams();
+        } catch (err) {
+            console.error('Seed failed:', err);
+            toast.error('Failed to seed data', { id: loadingToast });
         }
     };
 
@@ -322,20 +352,54 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
         ), { duration: Infinity, position: 'top-center' });
     };
 
+    const handleDeleteTeam = async (id, name) => {
+        if (name === 'All' || name === 'Administration') return toast.error('Standard system units cannot be deleted.');
+        
+        toast.custom((t) => (
+            <div className={`custom-confirm-toast ${t.visible ? 'animate-enter' : 'animate-leave'} glass`}>
+                <div className="confirm-content">
+                    <div className="confirm-icon delete-icon-bg">
+                        <Trash2 size={20} />
+                    </div>
+                    <div className="confirm-text">
+                        <h4>Delete Department?</h4>
+                        <p>Are you sure you want to delete the <strong>{name}</strong> team? This will remove the team from oversight but keep member data.</p>
+                    </div>
+                </div>
+                <div className="confirm-actions">
+                    <button className="confirm-btn cancel" onClick={() => toast.dismiss(t.id)}>Cancel</button>
+                    <button 
+                        className="confirm-btn confirm-delete" 
+                        onClick={async () => {
+                            toast.dismiss(t.id);
+                            try {
+                                await deleteTeam(id);
+                                toast.success(`${name} team deleted successfully`);
+                                setSelectedTeam('All');
+                                getTeams();
+                                getStats();
+                            } catch (err) {
+                                console.error('Failed to delete team:', err);
+                                toast.error(err.response?.data?.message || 'Error deleting team');
+                            }
+                        }}
+                    >
+                        Yes, Delete Team
+                    </button>
+                </div>
+            </div>
+        ), { duration: Infinity, position: 'top-center' });
+    };
 
-    const metricCards = selectedTeam === 'SBI' ? [
-        { label: 'Total Calls', value: stats.totalCalls, icon: <Phone size={24} />, color: '#6366f1' },
-        { label: 'PAN Verified', value: stats.totalPAN, icon: <ShieldCheck size={24} />, color: '#10b981' },
-        { label: 'Approved', value: stats.totalApproved, icon: <ThumbsUp size={24} />, color: '#0ea5e9' },
-        { label: 'Declined', value: stats.totalDeclined, icon: <ThumbsDown size={24} />, color: '#ef4444' },
-    ] : selectedTeam === 'All' ? [
+
+    const metricCards = selectedTeam === 'All' ? [
         { label: 'Network Total Calls', value: stats.totalCalls, icon: <Phone size={24} />, color: '#6366f1' },
         { label: 'Org-wide Conversions', value: stats.totalConverted, icon: <CheckCircle size={24} />, color: '#10b981' },
         { label: 'Global Target Avg', value: `${stats.avgTarget}%`, icon: <Target size={24} />, color: '#f59e0b' },
         { label: 'Total Personnel', value: stats.activeHrCount, icon: <Users size={24} />, color: '#a855f7' },
     ] : [
         { label: 'Total Calls (Live)', value: stats.totalCalls, icon: <Phone size={24} />, color: '#6366f1' },
-        { label: 'Converted Calls', value: stats.totalConverted, icon: <CheckCircle size={24} />, color: '#10b981' },
+        { label: 'Connected Calls', value: stats.totalConverted, icon: <CheckCircle size={24} />, color: '#10b981' },
         { label: 'Team Target Avg', value: `${stats.avgTarget}%`, icon: <Target size={24} />, color: '#f59e0b' },
         { label: 'Active Members', value: stats.activeHrCount, icon: <Users size={24} />, color: '#a855f7' },
     ];
@@ -379,7 +443,10 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                          <div className="report-selector-group" style={{ display: 'flex', gap: '15px' }}>
                              <div className="report-controls">
                                  <Clock size={16} />
-                                 <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
+                                 <Clock size={16} />
+                             <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                             <span style={{ color: 'var(--text-secondary)' }}>to</span>
+                             <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                              </div>
                              <button className="btn-primary" onClick={downloadAdminPDF}>
                                  <Download size={18} />
@@ -406,11 +473,34 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                                 }}
                             >
                                 <option value="All">Global Overview</option>
-                                <option value="HR">HR Department</option>
-                                <option value="SBI">SBI Department</option>
-                                <option value="BDE">BDE Department</option>
-                                <option value="Administration">Administration</option>
+                                {teams.map(team => (
+                                    <option key={team._id} value={team.name}>{team.name} Department</option>
+                                ))}
                             </select>
+                            {(selectedTeam !== 'All' && selectedTeam !== 'Administration') && (user.role === 'Admin' || user.role === 'Manager') && (
+                                <button 
+                                    className="delete-team-shortcut"
+                                    onClick={() => {
+                                        const teamObj = teams.find(t => t.name === selectedTeam);
+                                        if (teamObj) handleDeleteTeam(teamObj._id, teamObj.name);
+                                    }}
+                                    title="Delete this team"
+                                    style={{
+                                        background: 'rgba(239, 68, 68, 0.1)',
+                                        border: 'none',
+                                        color: '#ef4444',
+                                        padding: '4px',
+                                        borderRadius: '6px',
+                                        marginLeft: '5px',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    <Trash2 size={14} />
+                                </button>
+                            )}
                         </div>
                     )}
 
@@ -418,30 +508,39 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
 
 
                     {selectedTeam !== 'Administration' && (user.role === 'Admin' || user.role === 'Manager' || user.role === 'TL') && (
-                        viewMode === 'overview' ? (
-                            <button className="btn-primary" onClick={() => setIsAddModalOpen(true)}>
-                                <UserPlus size={18} />
-                                Add New Member
-                            </button>
-                        ) : (
-                            <div className="report-selector-group" style={{ display: 'flex', gap: '15px' }}>
-                                <div className="report-controls">
-                                    <FileText size={16} />
-                                    <select value={reportType} onChange={(e) => setReportType(e.target.value)}>
-                                        <option value="daily">Daily Report</option>
-                                        <option value="weekly">Weekly Report</option>
-                                        <option value="monthly">Monthly Report</option>
-                                    </select>
-                                    <div className="divider"></div>
-                                    <Clock size={16} />
-                                    <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
+                        <div className="action-center-group" style={{ display: 'flex', gap: '12px' }}>
+                            {viewMode === 'overview' ? (
+                                <>
+                                    {selectedTeam === 'All' ? (
+                                        <button className="btn-primary" onClick={() => setIsAddTeamModalOpen(true)}>
+                                            <Plus size={18} /> Add Team
+                                        </button>
+                                    ) : (
+                                        <button className="btn-primary" onClick={() => setIsAddModalOpen(true)}>
+                                            <UserPlus size={18} /> Add Member
+                                        </button>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="report-selector-group" style={{ display: 'flex', gap: '15px' }}>
+                                    <div className="report-controls">
+                                        <FileText size={16} />
+                                        <select value={reportType} onChange={(e) => setReportType(e.target.value)}>
+                                            <option value="daily">Daily Report</option>
+                                            <option value="weekly">Weekly Report</option>
+                                            <option value="monthly">Monthly Report</option>
+                                        </select>
+                                        <div className="divider"></div>
+                                        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                                        <span style={{ color: 'var(--text-secondary)' }}>to</span>
+                                        <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                                    </div>
+                                    <button className="btn-primary" onClick={downloadTeamPDF}>
+                                        <Download size={18} /> Report
+                                    </button>
                                 </div>
-                                <button className="btn-primary" onClick={downloadTeamPDF}>
-                                    <Download size={18} />
-                                    Download Team Report
-                                </button>
-                            </div>
-                        )
+                            )}
+                        </div>
                     )}
                 </div>
             </header>
@@ -547,21 +646,32 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                                 </div>
                                 <h3 style={{ margin: 0, fontSize: '1.2rem' }}>Performance Insights (Best Performer)</h3>
                             </div>
-                            {members.length > 0 ? (
+                            {members.length > 0 ? (() => {
+                                const sortedMembers = [...members].sort((a,b) => {
+                                    const aRate = a.achievementRate || 0;
+                                    const bRate = b.achievementRate || 0;
+                                    return bRate - aRate;
+                                });
+                                const best = sortedMembers[0];
+                                if (!best) return <p style={{ color: '#94a3b8' }}>No performance data available.</p>;
+
+                                 return (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                                     <div className="best-performer-avatar" style={{ width: '60px', height: '60px', borderRadius: '50%', background: '#6366f1', color: '#fff', display: 'flex', alignItems: 'center', justifySelf: 'center', fontSize: '1.5rem', fontWeight: 'bold', justifyContent: 'center' }}>
-                                        {[...members].sort((a,b) => b.achievementRate - a.achievementRate)[0].name.charAt(0)}
+                                        {best.name ? String(best.name).charAt(0) : '?'}
                                     </div>
                                     <div>
                                         <h4 style={{ margin: 0, color: '#10b981', fontSize: '1.1rem' }}>
-                                            ⭐ {[...members].sort((a,b) => b.achievementRate - a.achievementRate)[0].name}
+                                            ⭐ {best.name || 'Anonymous'}
                                         </h4>
                                         <p style={{ margin: '5px 0 0 0', color: '#94a3b8', fontSize: '0.9rem' }}>
-                                            Achieved <strong>{[...members].sort((a,b) => b.achievementRate - a.achievementRate)[0].achievementRate}%</strong> of target today.
+                                            Achieved <strong>{best.achievementRate || 0}%</strong> of target today.
                                         </p>
                                     </div>
                                 </div>
-                            ) : (
+                                );
+;
+                            })() : (
                                 <p style={{ color: '#94a3b8' }}>No performance data available yet.</p>
                             )}
                         </div>
@@ -571,11 +681,19 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                 </>
             )}
 
-            {viewMode === 'performance' && (
-                <section className="team-oversight glass">
+            {/* Always show Management Table in Performance mode, OR also show it in Overview mode for Admin/Manager */}
+            {(viewMode === 'performance' || ((user.role === 'Admin' || user.role === 'Manager') && viewMode === 'overview')) && (
+                <section className="team-oversight glass animate-enter" style={{ marginTop: '2rem' }}>
                     <div className="section-header">
-                        <h3>{user.role === 'TL' ? user.assignedTeam : selectedTeam} Performance Oversight</h3>
-                        <span className="live-pill">LIVE</span>
+                        <h3>{selectedTeam === 'All' ? 'Organization-Wide' : selectedTeam} Management Oversight</h3>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            {viewMode === 'overview' && (user.role === 'Admin' || user.role === 'Manager') && (
+                                <button className="action-btn" onClick={() => (window.location.href = '#')} title="Deep Analytics Coming Soon">
+                                    Full Analytics Preview
+                                </button>
+                            )}
+                            <span className="live-pill">LIVE</span>
+                        </div>
                     </div>
                     <div className="table-responsive">
                         <table className="oversight-table detailed">
@@ -591,24 +709,31 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                                         </>
                                     ) : (
                                         <>
-                                            <th>Calls (Purpose)</th>
+                                            <th>Calls (Conn)</th>
                                             {selectedTeam === 'SBI' ? (
                                                 <>
-                                                    <th>Verified (PAN/Details)</th>
-                                                    <th>Status (Appr/Decl)</th>
-                                                    <th>Dispatch</th>
+                                                    <th>RNR / OD</th>
+                                                    <th>Processing</th>
+                                                    <th>Received</th>
                                                 </>
                                             ) : selectedTeam === 'BDE' ? (
                                                 <>
-                                                    <th>Converted Leads</th>
-                                                    <th>No. of Joinings</th>
-                                                    <th>Company - Role</th>
+                                                    <th>Project</th>
+                                                    <th>Visits</th>
+                                                    <th>Interv/Paym</th>
+                                                    <th>Part/Joined</th>
+                                                </>
+                                            ) : selectedTeam === 'Insurance' ? (
+                                                <>
+                                                    <th>RNR</th>
+                                                    <th>Converted</th>
+                                                    <th>Payments</th>
                                                 </>
                                             ) : (
                                                 <>
-                                                    <th>Converted (Sector)</th>
-                                                    <th>Paid (Sector)</th>
-                                                    <th>Complaints (Reason)</th>
+                                                    <th>Converted</th>
+                                                    <th>Paid</th>
+                                                    <th>Complaints</th>
                                                 </>
                                             )}
                                         </>
@@ -620,15 +745,16 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                             </thead>
                             <tbody>
                                 {members.map((member) => {
-                                    const latest = member.performanceHistory[member.performanceHistory.length - 1] || {};
+                                    const history = member.performanceHistory || [];
+                                    const latest = history.length > 0 ? history[history.length - 1] : {};
                                     return (
                                         <tr key={member._id}>
                                             <td>
                                                 <div className="member-cell">
-                                                    <div className="member-initial">{member.name.charAt(0)}</div>
+                                                    <div className="member-initial">{member.name ? String(member.name).charAt(0) : '?'}</div>
                                                     <div className="member-meta">
-                                                        <span className="name">{member.name}</span>
-                                                        <span className="role">{member.designation}</span>
+                                                        <span className="name">{member.name || 'N/A'}</span>
+                                                        <span className="role">{member.designation || 'Staff'}</span>
                                                     </div>
                                                 </div>
                                             </td>
@@ -692,13 +818,7 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                                                     <td>
                                                         <div className="analytics-cell">
                                                             <span className="count">{latest.calls || 0}</span>
-                                                            {selectedTeam === 'SBI' && (
-                                                                <div style={{ display: 'flex', gap: '5px', fontSize: '0.7rem', marginTop: '2px' }}>
-                                                                    <span style={{ color: '#10b981' }}>P: {latest.callsPicked || 0}</span>
-                                                                    <span style={{ color: '#ef4444' }}>M: {latest.callsNotPicked || 0}</span>
-                                                                </div>
-                                                            )}
-                                                            <span className="category">{latest.callCategory || '-'}</span>
+                                                            <span className="category">({latest.convertedCalls || 0})</span>
                                                         </div>
                                                     </td>
 
@@ -707,24 +827,21 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                                                             <td>
                                                                 <div className="analytics-cell">
                                                                     <div style={{ display: 'flex', gap: '8px' }}>
-                                                                        <span className="count">{latest.panVerified || 0}</span>
-                                                                        <span className="count" style={{ color: '#a855f7' }}>{latest.detailsVerified || 0}</span>
+                                                                        <span className="count">{latest.rnr || 0}</span>
+                                                                        <span className="count" style={{ color: '#a855f7' }}>{latest.od || 0}</span>
                                                                     </div>
-                                                                    <span className="category">PAN / Details</span>
+                                                                    <span className="category">RNR / OD</span>
                                                                 </div>
                                                             </td>
                                                             <td>
                                                                 <div className="analytics-cell">
-                                                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                                                        <span className="count" style={{ color: '#10b981' }}>{latest.approvedCount || 0}</span>
-                                                                        <span className="count" style={{ color: '#ef4444' }}>{latest.declinedCount || 0}</span>
-                                                                    </div>
-                                                                    <span className="category">Appr / Decl</span>
+                                                                    <span className="count" style={{ color: '#0ea5e9' }}>{latest.cardProcessing || 0}</span>
+                                                                    <span className="category">Processing</span>
                                                                 </div>
                                                             </td>
                                                             <td>
                                                                 <div className="analytics-cell">
-                                                                    <span className="count">{latest.dispatchCompleted || 0}</span>
+                                                                    <span className="count" style={{ color: '#10b981' }}>{latest.cardReceived || 0}</span>
                                                                     <span className="category">Items</span>
                                                                 </div>
                                                             </td>
@@ -733,20 +850,52 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                                                         <>
                                                             <td>
                                                                 <div className="analytics-cell">
-                                                                    <span className="count">{member.convertedCalls || 0}</span>
-                                                                    <span className="sector">Leads</span>
+                                                                    <span className="reason" style={{ fontSize: '0.75rem' }}>{member.project || '-'}</span>
                                                                 </div>
                                                             </td>
                                                             <td>
                                                                 <div className="analytics-cell">
-                                                                    <span className="count">{member.paidCount || 0}</span>
-                                                                    <span className="sector">Joinings</span>
+                                                                    <span className="count">{latest.officeVisits || 0}</span>
                                                                 </div>
                                                             </td>
                                                             <td>
                                                                 <div className="analytics-cell">
-                                                                    <div style={{ fontSize: '0.8rem', color: '#fff', fontWeight: 'bold' }}>{member.companyName || '-'}</div>
-                                                                    <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{member.rolePosition || '-'}</div>
+                                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                                        <span className="count">{latest.underInterview || 0}</span>
+                                                                        <span className="count" style={{ color: '#f59e0b' }}>{latest.paymentProgress || 0}</span>
+                                                                    </div>
+                                                                    <span className="category">Int / Pay</span>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div className="analytics-cell">
+                                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                                        <span className="count" style={{ color: '#ec4899' }}>{latest.partialPaid || 0}</span>
+                                                                        <span className="count" style={{ color: '#10b981' }}>{latest.joinedCompany || 0}</span>
+                                                                    </div>
+                                                                    <span className="category">Part / Join</span>
+                                                                </div>
+                                                            </td>
+                                                        </>
+                                                    ) : selectedTeam === 'Insurance' ? (
+                                                        <>
+                                                            <td>
+                                                                <div className="analytics-cell">
+                                                                    <span className="count">{latest.rnr || 0}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div className="analytics-cell">
+                                                                    <span className="count" style={{ color: '#10b981' }}>{latest.insuranceConverted || 0}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div className="analytics-cell">
+                                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                                        <span className="count">{latest.partialPaymentDone || 0}</span>
+                                                                        <span className="count" style={{ color: '#10b981' }}>{latest.fullyPaid || 0}</span>
+                                                                    </div>
+                                                                    <span className="category">Part / Full</span>
                                                                 </div>
                                                             </td>
                                                         </>
@@ -754,20 +903,20 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                                                         <>
                                                             <td>
                                                                 <div className="analytics-cell">
-                                                                    <span className="count">{member.convertedCalls || 0}</span>
-                                                                    <span className="sector">{member.conversionSector || '-'}</span>
+                                                                    <span className="count">{latest.convertedCalls || 0}</span>
+                                                                    <span className="sector">{latest.conversionSector || '-'}</span>
                                                                 </div>
                                                             </td>
                                                             <td>
                                                                 <div className="analytics-cell">
-                                                                    <span className="count">{member.paidCount || 0}</span>
-                                                                    <span className="sector">{member.paidSector || '-'}</span>
+                                                                    <span className="count">{latest.paidCount || 0}</span>
+                                                                    <span className="sector">{latest.paidSector || '-'}</span>
                                                                 </div>
                                                             </td>
                                                             <td>
                                                                 <div className="analytics-cell">
-                                                                    <span className="count">{member.totalComplaints || 0}</span>
-                                                                    <span className="reason">{member.complaintReason || '-'}</span>
+                                                                    <span className="count">{latest.totalComplaints || 0}</span>
+                                                                    <span className="reason">{latest.complaintReason || '-'}</span>
                                                                 </div>
                                                             </td>
                                                         </>
@@ -817,156 +966,185 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
 
             <div style={{ position: 'absolute', left: '-10000px', top: 0 }}>
                 <div ref={reportRef} className="printable-report" style={{ padding: '30px', background: '#fff', color: '#334155', width: '1000px', fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #6366f1', paddingBottom: '20px', marginBottom: '30px' }}>
-                        <div>
-                            <h1 style={{ margin: 0, color: '#1e293b', fontSize: '24px' }}>Forge India Connect</h1>
-                            <p style={{ margin: '5px 0 0 0', color: '#64748b' }}>{selectedTeam} Team Performance Report ({reportType.toUpperCase()})</p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #1e293b', paddingBottom: '20px', marginBottom: '30px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                            <div style={{ width: '60px', height: '60px', background: '#1e293b', color: '#fff', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', fontWeight: 'bold' }}>F</div>
+                            <div>
+                                <h1 style={{ margin: 0, color: '#1e293b', fontSize: '28px', textTransform: 'uppercase', letterSpacing: '1px' }}>Forge India Connect</h1>
+                                <p style={{ margin: '2px 0 0 0', color: '#64748b', fontSize: '14px' }}>Professional Business Solutions & Recruitment</p>
+                            </div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                            <p style={{ margin: 0, fontWeight: 'bold' }}>Date: {selectedDate}</p>
-                            <p style={{ margin: '5px 0 0 0', fontSize: '12px' }}>Generated: {new Date().toLocaleString()}</p>
+                            <p style={{ margin: 0, color: '#1e293b', fontWeight: 'bold', fontSize: '16px' }}>OFFICIAL PERFORMANCE REPORT</p>
+                            <p style={{ margin: '5px 0 0 0', color: '#64748b', fontSize: '12px' }}>{startDate} to {endDate}</p>
                         </div>
+                    </div>
+
+                    <div style={{ marginBottom: '30px', background: '#f8fafc', padding: '20px', borderRadius: '12px', borderLeft: '5px solid #1e293b' }}>
+                        <h3 style={{ margin: '0 0 10px 0', color: '#1e293b' }}>Executive Summary: {selectedTeam} Team</h3>
+                        <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: '1.6' }}>
+                            This report provides a comprehensive performance analysis of the {selectedTeam} team during the period from <strong>{startDate}</strong> to <strong>{endDate}</strong>. 
+                            The following data reflects individual and collective achievements against organizational targets.
+                        </p>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '30px' }}>
                         {[
                             { label: 'Total Calls', value: reportStats.totalCalls },
-                            selectedTeam === 'SBI' ? { label: 'Picked/Not Picked', value: `${reportStats.totalPicked} / ${reportStats.totalNotPicked}` } : { label: 'Total Converted', value: reportStats.totalConverted },
-                            selectedTeam === 'SBI' ? { label: 'Total Approved', value: reportStats.totalApproved } : { label: 'Achievement', value: `${reportStats.avgTarget}%` },
-                            { label: 'Active Members', value: reportStats.activeHrCount }
+                            { label: 'Avg Connections', value: reportStats.totalConverted },
+                            { label: 'Achievement Rate', value: `${reportStats.avgTarget}%` },
+                            { label: 'Team Size', value: reportStats.activeHrCount }
 
                         ].map((stat, i) => (
-                            <div key={i} style={{ background: '#f8fafc', padding: '15px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                                <span style={{ fontSize: '12px', color: '#64748b', display: 'block', marginBottom: '5px' }}>{stat.label}</span>
-                                <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#1e293b' }}>{stat.value}</span>
+                            <div key={i} style={{ background: '#fff', padding: '15px', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                                <span style={{ fontSize: '12px', color: '#64748b', display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>{stat.label}</span>
+                                <span style={{ fontSize: '22px', fontWeight: 'bold', color: '#1e293b' }}>{stat.value}</span>
                             </div>
                         ))}
                     </div>
 
                     <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #cbd5e1', tableLayout: 'fixed' }}>
                         <thead>
-                            <tr style={{ background: '#f8fafc' }}>
-                                <th style={{ padding: '12px 8px', textAlign: 'left', border: '1px solid #cbd5e1', fontSize: '11px', color: '#475569', width: '15%' }}>MEMBER</th>
-                                <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #cbd5e1', fontSize: '11px', color: '#475569', width: '10%' }}>CALLS</th>
+                            <tr style={{ background: '#1e293b' }}>
+                                <th style={{ padding: '12px 8px', textAlign: 'left', border: '1px solid #334155', fontSize: '10px', color: '#fff', width: '14%', textTransform: 'uppercase' }}>Member</th>
+                                <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #334155', fontSize: '10px', color: '#fff', width: '8%', textTransform: 'uppercase' }}>Calls</th>
                                 {selectedTeam === 'SBI' ? (
                                     <>
-                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #cbd5e1', fontSize: '11px', color: '#475569', width: '15%' }}>VERIFIED</th>
-                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #cbd5e1', fontSize: '11px', color: '#475569', width: '15%' }}>STATUS</th>
-                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #cbd5e1', fontSize: '11px', color: '#475569', width: '10%' }}>DISPATCH</th>
+                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #334155', fontSize: '10px', color: '#fff', width: '10%', textTransform: 'uppercase' }}>RNR/OD</th>
+                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #334155', fontSize: '10px', color: '#fff', width: '12%', textTransform: 'uppercase' }}>Processing</th>
+                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #334155', fontSize: '10px', color: '#fff', width: '10%', textTransform: 'uppercase' }}>Received</th>
                                     </>
                                 ) : selectedTeam === 'BDE' ? (
                                     <>
-                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #cbd5e1', fontSize: '11px', color: '#475569', width: '12%' }}>LEADS</th>
-                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #cbd5e1', fontSize: '11px', color: '#475569', width: '12%' }}>JOINEES</th>
-                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #cbd5e1', fontSize: '11px', color: '#475569', width: '16%' }}>WORK DETAILS</th>
+                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #334155', fontSize: '10px', color: '#fff', width: '10%', textTransform: 'uppercase' }}>Visits</th>
+                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #334155', fontSize: '10px', color: '#fff', width: '12%', textTransform: 'uppercase' }}>Int/Pay</th>
+                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #334155', fontSize: '10px', color: '#fff', width: '10%', textTransform: 'uppercase' }}>Joined</th>
+                                    </>
+                                ) : selectedTeam === 'Insurance' ? (
+                                    <>
+                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #334155', fontSize: '10px', color: '#fff', width: '12%', textTransform: 'uppercase' }}>RNR</th>
+                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #334155', fontSize: '10px', color: '#fff', width: '12%', textTransform: 'uppercase' }}>Converted</th>
+                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #334155', fontSize: '10px', color: '#fff', width: '10%', textTransform: 'uppercase' }}>Paid</th>
                                     </>
                                 ) : (
                                     <>
-                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #cbd5e1', fontSize: '11px', color: '#475569', width: '15%' }}>CONV (SEC)</th>
-                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #cbd5e1', fontSize: '11px', color: '#475569', width: '15%' }}>PAID (SEC)</th>
-                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #cbd5e1', fontSize: '11px', color: '#475569', width: '10%' }}>COMPL</th>
+                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #334155', fontSize: '10px', color: '#fff', width: '10%', textTransform: 'uppercase' }}>Conv</th>
+                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #334155', fontSize: '10px', color: '#fff', width: '10%', textTransform: 'uppercase' }}>Paid</th>
+                                        <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #334155', fontSize: '10px', color: '#fff', width: '10%', textTransform: 'uppercase' }}>Compl</th>
                                     </>
                                 )}
-                                <th style={{ padding: '12px 8px', textAlign: 'left', border: '1px solid #cbd5e1', fontSize: '11px', color: '#475569', width: '20%' }}>COMMENTS</th>
-                                <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #cbd5e1', fontSize: '11px', color: '#475569', width: '8%' }}>TARGET%</th>
+                                <th style={{ padding: '12px 8px', textAlign: 'left', border: '1px solid #334155', fontSize: '10px', color: '#fff', width: '20%', textTransform: 'uppercase' }}>Comments</th>
+                                <th style={{ padding: '12px 8px', textAlign: 'center', border: '1px solid #334155', fontSize: '10px', color: '#fff', width: '8%', textTransform: 'uppercase' }}>Target%</th>
                             </tr>
                         </thead>
                         <tbody>
                             {reportRows.map((row, i) => (
-                                <tr key={i}>
+                                <tr key={i} style={{ background: i % 2 === 0 ? '#fff' : '#f9fafb' }}>
                                     <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1' }}>
-                                        <div style={{ fontWeight: 'bold', color: '#1e293b', fontSize: '12px' }}>{row.name || 'Member'}</div>
-                                        <div style={{ fontSize: '10px', color: '#64748b' }}>{row.designation}</div>
+                                        <div style={{ fontWeight: 'bold', color: '#1e293b', fontSize: '11px' }}>{row.name}</div>
+                                        <div style={{ fontSize: '9px', color: '#64748b' }}>{row.designation}</div>
                                     </td>
                                     <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1', textAlign: 'center' }}>
-                                        <div style={{ color: '#1e293b', fontWeight: 'bold', fontSize: '13px' }}>{row.aggCalls || 0}</div>
-                                        {selectedTeam === 'SBI' && (
-                                            <div style={{ fontSize: '9px', display: 'flex', justifyContent: 'center', gap: '4px', marginTop: '2px' }}>
-                                                <span style={{ color: '#059669' }}>P:{row.aggPicked || 0}</span>
-                                                <span style={{ color: '#dc2626' }}>M:{row.aggNotPicked || 0}</span>
-                                            </div>
-                                        )}
+                                        <div style={{ color: '#1e293b', fontWeight: 'bold', fontSize: '12px' }}>{row.aggCalls}</div>
+                                        <div style={{ fontSize: '9px', color: '#64748b' }}>({row.aggConverted})</div>
                                     </td>
 
                                     {selectedTeam === 'SBI' ? (
                                         <>
                                             <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1', textAlign: 'center' }}>
-                                                <div style={{ color: '#334155', fontSize: '11px' }}>PAN: <strong>{row.aggPAN || 0}</strong></div>
-                                                <div style={{ color: '#7c3aed', fontSize: '11px' }}>Det: <strong>{row.aggDetails || 0}</strong></div>
+                                                <div style={{ color: '#1e293b', fontSize: '11px' }}>RNR: <strong>{row.aggRNR}</strong></div>
+                                                <div style={{ color: '#a855f7', fontSize: '11px' }}>OD: <strong>{row.aggOD}</strong></div>
                                             </td>
                                             <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1', textAlign: 'center' }}>
-                                                <div style={{ color: '#059669', fontSize: '11px' }}>Appr: <strong>{row.aggApproved || 0}</strong></div>
-                                                <div style={{ color: '#dc2626', fontSize: '11px' }}>Decl: <strong>{row.aggDeclined || 0}</strong></div>
+                                                <div style={{ color: '#0ea5e9', fontSize: '12px', fontWeight: 'bold' }}>{row.aggProcessing}</div>
                                             </td>
                                             <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1', textAlign: 'center' }}>
-                                                <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#1e293b' }}>{row.aggDispatch || 0}</div>
-                                                <div style={{ fontSize: '9px', color: '#64748b' }}>Items</div>
+                                                <div style={{ color: '#10b981', fontSize: '12px', fontWeight: 'bold' }}>{row.aggReceived}</div>
                                             </td>
                                         </>
                                     ) : selectedTeam === 'BDE' ? (
                                         <>
                                             <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1', textAlign: 'center' }}>
-                                                <div style={{ color: '#1e293b', fontWeight: 'bold', fontSize: '13px' }}>{row.aggConverted || 0}</div>
+                                                <div style={{ color: '#1e293b', fontWeight: 'bold', fontSize: '12px' }}>{row.aggVisits}</div>
                                             </td>
                                             <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1', textAlign: 'center' }}>
-                                                <div style={{ color: '#1e293b', fontWeight: 'bold', fontSize: '13px' }}>{row.aggPaid || 0}</div>
+                                                <div style={{ color: '#1e293b', fontSize: '10px' }}>I: <strong>{row.aggInterview}</strong></div>
+                                                <div style={{ color: '#f59e0b', fontSize: '10px' }}>P: <strong>{row.aggPayment}</strong></div>
                                             </td>
-                                            <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1' }}>
-                                                <div style={{ color: '#1e293b', fontWeight: 'bold', fontSize: '11px' }}>{row.companyName || '-'}</div>
-                                                <div style={{ fontSize: '9px', color: '#64748b' }}>{row.rolePosition || '-'}</div>
+                                            <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1', textAlign: 'center' }}>
+                                                <div style={{ color: '#10b981', fontWeight: 'bold', fontSize: '12px' }}>{row.aggJoined}</div>
+                                            </td>
+                                        </>
+                                    ) : selectedTeam === 'Insurance' ? (
+                                        <>
+                                            <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1', textAlign: 'center' }}>
+                                                <div style={{ color: '#1e293b', fontWeight: 'bold', fontSize: '12px' }}>{row.aggRNR}</div>
+                                            </td>
+                                            <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1', textAlign: 'center' }}>
+                                                <div style={{ color: '#10b981', fontWeight: 'bold', fontSize: '12px' }}>{row.aggInsConverted}</div>
+                                            </td>
+                                            <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1', textAlign: 'center' }}>
+                                                <div style={{ color: '#1e293b', fontSize: '10px' }}>P: <strong>{row.aggInsPartial}</strong></div>
+                                                <div style={{ color: '#10b981', fontSize: '10px' }}>F: <strong>{row.aggInsFull}</strong></div>
                                             </td>
                                         </>
                                     ) : (
                                         <>
                                             <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1', textAlign: 'center' }}>
-                                                <div style={{ color: '#1e293b', fontWeight: 'bold', fontSize: '13px' }}>{row.aggConverted || 0}</div>
-                                                <div style={{ fontSize: '9px', color: '#64748b' }}>{row.aggConvSector || '-'}</div>
+                                                <div style={{ color: '#1e293b', fontWeight: 'bold', fontSize: '12px' }}>{row.aggConverted}</div>
                                             </td>
                                             <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1', textAlign: 'center' }}>
-                                                <div style={{ color: '#1e293b', fontWeight: 'bold', fontSize: '13px' }}>{row.aggPaid || 0}</div>
-                                                <div style={{ fontSize: '9px', color: '#64748b' }}>{row.aggPaidSector || '-'}</div>
+                                                <div style={{ color: '#1e293b', fontWeight: 'bold', fontSize: '12px' }}>{row.aggPaid}</div>
                                             </td>
                                             <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1', textAlign: 'center' }}>
-                                                <div style={{ color: '#1e293b', fontWeight: 'bold', fontSize: '13px' }}>{row.aggComplaints || 0}</div>
-                                                <div style={{ fontSize: '9px', color: '#64748b' }}>{row.aggCompReason || '-'}</div>
+                                                <div style={{ color: '#ef4444', fontWeight: 'bold', fontSize: '12px' }}>{row.aggComplaints}</div>
                                             </td>
                                         </>
                                     )}
 
-                                    <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1', fontSize: '10px', color: '#475569' }}>
-                                        {row.aggComments && row.aggComments !== '-' ? row.aggComments : ''}
+                                    <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1', fontSize: '9px', color: '#475569' }}>
+                                        {row.aggComments}
                                     </td>
-                                    <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1', fontSize: '12px', fontWeight: 'bold', textAlign: 'center', color: '#334155' }}>
-                                        {row.aggTarget || 0}%
+                                    <td style={{ padding: '10px 8px', border: '1px solid #cbd5e1', fontSize: '12px', fontWeight: 'bold', textAlign: 'center', color: row.aggTarget >= 80 ? '#10b981' : '#f59e0b' }}>
+                                        {row.aggTarget}%
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
-                    <div style={{ marginTop: '50px', borderTop: '2px solid #6366f1', paddingTop: '20px', display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{ marginTop: '50px', borderTop: '2px solid #1e293b', paddingTop: '20px', display: 'flex', justifyContent: 'space-between' }}>
                         <div style={{ fontSize: '11px', color: '#64748b' }}>
                             &copy; {new Date().getFullYear()} Forge India Connect Management Hub.
                         </div>
                         <div style={{ textAlign: 'right' }}>
                             <p style={{ margin: 0, fontSize: '12px', fontWeight: 'bold', color: '#1e293b' }}>Report Drafted By:</p>
-                            <p style={{ margin: '3px 0 0 0', fontSize: '14px', color: '#6366f1', fontWeight: 'bold' }}>{user.name}</p>
+                            <p style={{ margin: '3px 0 0 0', fontSize: '14px', color: '#1e293b', fontWeight: 'bold' }}>{user.name}</p>
                             <p style={{ margin: '1px 0 0 0', fontSize: '11px', color: '#64748b' }}>{user.designation}</p>
                         </div>
                     </div>
-
                 </div>
             </div>
 
-            {isUpdateModalOpen && (
-                <StatsEntryModal user={user} member={selectedMember} onClose={() => setIsUpdateModalOpen(false)} onSave={handleSaveStats} />
+            {isUpdateModalOpen && selectedMember && (
+                <StatsEntryModal user={user} member={selectedMember} onClose={() => { setIsUpdateModalOpen(false); setSelectedMember(null); }} onSave={handleSaveStats} />
             )}
 
+            {isAddTeamModalOpen && (
+                <AddTeamModal
+                    isOpen={isAddTeamModalOpen}
+                    onClose={() => setIsAddTeamModalOpen(false)}
+                    onAdd={handleAddTeam}
+                    theme={theme}
+                />
+            )}
 
             {isAddModalOpen && (
                 <AddMemberModal 
+                    isOpen={isAddModalOpen} 
                     onClose={() => setIsAddModalOpen(false)} 
-                    onSave={handleAddMember} 
-                    defaultTeam={selectedTeam} 
+                    onAdd={handleAddMember}
+                    defaultTeam={selectedTeam}
+                    teams={teams}
                 />
             )}
         </div>

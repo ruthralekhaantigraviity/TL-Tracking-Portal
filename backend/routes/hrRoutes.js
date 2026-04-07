@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const HRMember = require('../models/HRMember');
 const User = require('../models/User');
+const Team = require('../models/Team');
 const AdminActivity = require('../models/AdminActivity');
 
 const JWT_SECRET = 'forge-india-secret-2024';
@@ -55,6 +56,136 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// @route   POST /api/hr/register
+// @desc    Register a new user
+router.post('/register', async (req, res) => {
+    try {
+        const { username, password, name, role, designation, assignedTeam } = req.body;
+        
+        // Check if username already exists
+        const existingUser = await User.findOne({ username: { $regex: new RegExp(`^${username}$`, 'i') } });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Username already taken' });
+        }
+
+        const newUser = new User({
+            username: username.toLowerCase(),
+            password, // Password hashing is handled by pre-save hook
+            name,
+            role: role || 'TL',
+            designation,
+            assignedTeam: assignedTeam || 'HR'
+        });
+
+        await newUser.save();
+        
+        const token = jwt.sign({ _id: newUser._id }, JWT_SECRET);
+        
+        res.status(201).json({
+            token,
+            user: {
+                _id: newUser._id,
+                username: newUser.username,
+                name: newUser.name,
+                role: newUser.role,
+                designation: newUser.designation,
+                assignedTeam: newUser.assignedTeam
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// @route   GET /api/hr/teams
+// @desc    Get all teams (Publicly accessible for registration)
+router.get('/teams', async (req, res) => {
+    try {
+        let teams = await Team.find().sort({ name: 1 }).lean();
+        
+        // Check for optional auth to show Administration
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+        let user = null;
+        if (token) {
+            try {
+                const decoded = jwt.verify(token, JWT_SECRET);
+                user = await User.findById(decoded._id);
+            } catch (e) {
+                // Ignore token error for this public route
+            }
+        }
+
+        // Ensure Administration is in the list for Admin/Manager
+        if (user && (user.role === 'Admin' || user.role === 'Manager')) {
+            const hasAdmin = teams.some(t => t.name === 'Administration');
+            if (!hasAdmin) {
+                teams.unshift({ 
+                    _id: 'admin_team_id', 
+                    name: 'Administration', 
+                    domain: 'Management' 
+                });
+            }
+        } else {
+            // Public registration also sees Administration option by default 
+            // OR we can decide to hide it. I'll include it for now as per user's "all dashboards" request.
+            if (!teams.some(t => t.name === 'Administration')) {
+                teams.unshift({ _id: 'admin_team_id', name: 'Administration', domain: 'Management' });
+            }
+        }
+        
+        res.json(teams);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// @route   POST /api/hr/teams
+// @desc    Create a new team
+router.post('/teams', auth, async (req, res) => {
+    try {
+        if (req.user.role !== 'Admin' && req.user.role !== 'Manager') {
+            return res.status(403).json({ message: 'Only Admins and Managers can add teams' });
+        }
+        const { name, domain, description } = req.body;
+        
+        // Check if team name already exists (case-insensitive)
+        const existingTeam = await Team.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
+        if (existingTeam) {
+            return res.status(400).json({ message: `A team named "${name}" already exists. Please choose a different name.` });
+        }
+
+        const newTeam = new Team({ name, domain, description });
+        const savedTeam = await newTeam.save();
+        res.status(201).json(savedTeam);
+    } catch (err) {
+        res.status(400).json({ message: 'Failed to create team. Please check your inputs.' });
+    }
+});
+
+// @route   DELETE /api/hr/teams/:id
+// @desc    Delete a team
+router.delete('/teams/:id', auth, async (req, res) => {
+    try {
+        if (req.user.role !== 'Admin' && req.user.role !== 'Manager') {
+            return res.status(403).json({ message: 'Only Admins and Managers can delete teams' });
+        }
+        
+        const team = await Team.findById(req.params.id);
+        if (!team) {
+            return res.status(404).json({ message: 'Team not found' });
+        }
+
+        // Optional: We could prevent deletion if members exist, 
+        // but for now, we'll just delete the team entry.
+        await Team.findByIdAndDelete(req.params.id);
+        
+        console.log(`Team "${team.name}" deleted by ${req.user.name}`);
+        res.json({ message: 'Team deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 // @route   GET /api/hr
 // @desc    Get members (filtered by user access)
 router.get('/', auth, async (req, res) => {
@@ -76,42 +207,56 @@ router.get('/', auth, async (req, res) => {
     }
 });
 
-// @route   GET /api/hr/seed-users
-router.get('/seed-users', async (req, res) => {
-    try {
-        await User.deleteMany({});
-        const users = await User.create([
-            { username: 'sabari', password: 'sabari123', name: 'Sabari', designation: 'TL BDE', role: 'TL', assignedTeam: 'BDE' },
-            { username: 'srisha', password: 'srisha123', name: 'Srisha', designation: 'TL SBI', role: 'TL', assignedTeam: 'SBI' },
-            { username: 'Aditiya', password: 'Aditiya123', name: 'Aditiya', designation: 'HR Manager', role: 'Manager', assignedTeam: 'All' },
-            { username: 'vaideeshwari', password: 'password123', name: 'Vaideeshwari', designation: 'Administration', role: 'Admin', assignedTeam: 'All' },
-            { username: 'admin', password: 'password123', name: 'Admin User', designation: 'Portal Admin', role: 'Admin', assignedTeam: 'All' }
-        ]);
-        res.status(201).json({ message: 'Users seeded', count: users.length });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+// @route   POST /api/hr/seed-users
+router.post('/seed-users', async (req, res) => {
+    res.json({ message: 'User seeding handled by main seed' });
 });
 
-// @route   GET /api/hr/seed
-router.get('/seed', async (req, res) => {
+// @route   POST /api/hr/seed
+router.post('/seed', async (req, res) => {
     try {
+        // Seed Users
+        await User.deleteMany({});
+        const users = await User.create([
+            { username: 'sabari', password: 'password123', name: 'Sabari', designation: 'TL – BDE', role: 'TL', assignedTeam: 'BDE' },
+            { username: 'sreesha', password: 'password123', name: 'Sreesha', designation: 'TL – SBI', role: 'TL', assignedTeam: 'SBI' },
+            { username: 'insurance_tl', password: 'password123', name: 'Insurance TL', designation: 'TL – Insurance', role: 'TL', assignedTeam: 'Insurance' },
+            { username: 'adithya', password: 'password123', name: 'Adithya', designation: 'HR Manager', role: 'Manager', assignedTeam: 'All' },
+            { username: 'vaideeshwari', password: 'password123', name: 'Vaideeshwari', designation: 'Administration', role: 'Admin', assignedTeam: 'All' }
+        ]);
+
+        // Seed Teams
+        await Team.deleteMany({});
+        const teams = await Team.create([
+            { name: 'BDE', domain: 'Business Development', description: 'BDE Team Operations' },
+            { name: 'SBI', domain: 'Financial Services', description: 'SBI Card Reporting' },
+            { name: 'Insurance', domain: 'Insurance', description: 'Insurance Team Reporting' },
+            { name: 'Administration', domain: 'Management', description: 'Core System Control' }
+        ]);
+
+        // Seed Sample Members
         await HRMember.deleteMany({});
         const members = await HRMember.create([
             {
-                name: 'Aditya', designation: 'Senior HR Manager', domain: 'Recruitment', team: 'HR', dailyTask: 'Candidate Shortlisting', dailyTarget: 50, completedTarget: 42, totalCalls: 120, totalJoinees: 8, totalComplaints: 2, achievementRate: 94, workDuration: '9h',
-                performanceHistory: [{ date: new Date(), calls: 90, joinees: 4, complaints: 0 }]
+                name: 'Vikas Chenna', team: 'BDE', designation: 'BDE Executive', project: 'Asset Acquisition', dailyTarget: 10, completedTarget: 8, totalCalls: 45, 
+                performanceHistory: [{ date: new Date(), project: 'Asset Acquisition', calls: 45, officeVisits: 2, joinedCompany: 1, completedTarget: 8 }]
             },
             {
-                name: 'Darshan', designation: 'HR Executive', domain: 'Sales', team: 'SBI', dailyTask: 'Final Interview Scheduling', dailyTarget: 30, completedTarget: 28, totalCalls: 98, totalJoinees: 4, totalComplaints: 1, achievementRate: 88, workDuration: '8h',
-                performanceHistory: [{ date: new Date(), calls: 75, callsPicked: 50, callsNotPicked: 25, approvedCount: 1, declinedCount: 1, panVerified: 5, detailsVerified: 5, dispatchCompleted: 2, comments: 'Steady SBI outreach.' }]
+                name: 'Rahul Kumar', team: 'SBI', designation: 'SBI Executive', dailyTarget: 20, completedTarget: 15, totalCalls: 60,
+                performanceHistory: [{ date: new Date(), calls: 60, rnr: 5, od: 2, cardProcessing: 10, cardReceived: 3, completedTarget: 15 }]
             },
             {
-                name: 'Yokesh', designation: 'BDE Professional', domain: 'Sales', team: 'BDE', dailyTask: 'Client Acquisition', dailyTarget: 10, completedTarget: 8, totalCalls: 45, totalJoinees: 3, totalComplaints: 0, achievementRate: 80, workDuration: '8h', companyName: 'Google India', rolePosition: 'Sales Lead',
-                performanceHistory: [{ date: new Date(), calls: 15, joinees: 1, companyName: 'Google India', rolePosition: 'Sales Lead' }]
+                name: 'Anjali Sharma', team: 'Insurance', designation: 'Insurance Executive', dailyTarget: 15, completedTarget: 10, totalCalls: 50,
+                performanceHistory: [{ date: new Date(), calls: 50, insuranceConverted: 5, partialPaymentDone: 2, fullyPaid: 1, completedTarget: 10 }]
             }
         ]);
-        res.status(201).json({ message: 'Members seeded', count: members.length });
+
+        res.status(201).json({ 
+            message: 'Portal Seeding Successful', 
+            users: users.length, 
+            teams: teams.length,
+            members: members.length
+        });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -169,17 +314,23 @@ router.put('/:id', auth, async (req, res) => {
              if (updateFields.callCategory !== undefined) latest.callCategory = updateFields.callCategory;
              
              // Update SBI fields in history
-             if (updateFields.panVerified !== undefined) latest.panVerified = Number(updateFields.panVerified);
-             if (updateFields.detailsVerified !== undefined) latest.detailsVerified = Number(updateFields.detailsVerified);
-             if (updateFields.approvedCount !== undefined) latest.approvedCount = Number(updateFields.approvedCount);
-             if (updateFields.declinedCount !== undefined) latest.declinedCount = Number(updateFields.declinedCount);
-             if (updateFields.dispatchCompleted !== undefined) latest.dispatchCompleted = Number(updateFields.dispatchCompleted);
-             if (updateFields.callsPicked !== undefined) latest.callsPicked = Number(updateFields.callsPicked);
-             if (updateFields.callsNotPicked !== undefined) latest.callsNotPicked = Number(updateFields.callsNotPicked);
+             if (updateFields.rnr !== undefined) latest.rnr = Number(updateFields.rnr);
+             if (updateFields.od !== undefined) latest.od = Number(updateFields.od);
+             if (updateFields.cardProcessing !== undefined) latest.cardProcessing = Number(updateFields.cardProcessing);
+             if (updateFields.cardReceived !== undefined) latest.cardReceived = Number(updateFields.cardReceived);
              
              // Update BDE fields in history
-             if (updateFields.companyName) latest.companyName = updateFields.companyName;
-             if (updateFields.rolePosition) latest.rolePosition = updateFields.rolePosition;
+             if (updateFields.project) latest.project = updateFields.project;
+             if (updateFields.officeVisits !== undefined) latest.officeVisits = Number(updateFields.officeVisits);
+             if (updateFields.underInterview !== undefined) latest.underInterview = Number(updateFields.underInterview);
+             if (updateFields.paymentProgress !== undefined) latest.paymentProgress = Number(updateFields.paymentProgress);
+             if (updateFields.partialPaid !== undefined) latest.partialPaid = Number(updateFields.partialPaid);
+             if (updateFields.joinedCompany !== undefined) latest.joinedCompany = Number(updateFields.joinedCompany);
+
+             // Update Insurance fields in history
+             if (updateFields.insuranceConverted !== undefined) latest.insuranceConverted = Number(updateFields.insuranceConverted);
+             if (updateFields.partialPaymentDone !== undefined) latest.partialPaymentDone = Number(updateFields.partialPaymentDone);
+             if (updateFields.fullyPaid !== undefined) latest.fullyPaid = Number(updateFields.fullyPaid);
              
              latest.comments = updateFields.comments || latest.comments;
         }

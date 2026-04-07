@@ -4,13 +4,15 @@ import { X, UserPlus, Briefcase, User, Users } from 'lucide-react';
 
 import '../styles/AddMemberModal.css';
 
-const AddMemberModal = ({ onClose, onSave, defaultTeam = 'HR' }) => {
+const AddMemberModal = ({ isOpen, onClose, onAdd, defaultTeam = 'HR', teams = [] }) => {
     const [formData, setFormData] = useState({
         name: '',
         designation: '',
         domain: defaultTeam === 'SBI' ? 'Sales' : defaultTeam === 'BDE' ? 'Field Sales' : 'Recruitment',
         team: (!defaultTeam || defaultTeam === 'All') ? 'HR' : defaultTeam
     });
+
+    if (!isOpen) return null;
 
 
     const handleChange = (e) => {
@@ -34,7 +36,7 @@ const AddMemberModal = ({ onClose, onSave, defaultTeam = 'HR' }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave(formData);
+        onAdd(formData);
     };
 
     return (
@@ -102,12 +104,20 @@ const AddMemberModal = ({ onClose, onSave, defaultTeam = 'HR' }) => {
                             onChange={handleChange}
                             className="modal-select"
                         >
-                            <option value="HR">HR Team</option>
-                            <option value="SBI">SBI Team</option>
-                            <option value="BDE">BDE Team</option>
-                            <option value="IT">IT Team</option>
-                            <option value="Administration">Administration</option>
-                            <option value="Sales">Sales Team</option>
+                            {teams.length > 0 ? (
+                                teams.map(team => (
+                                    <option key={team._id} value={team.name}>{team.name} Team</option>
+                                ))
+                            ) : (
+                                <>
+                                    <option value="HR">HR Team</option>
+                                    <option value="SBI">SBI Team</option>
+                                    <option value="BDE">BDE Team</option>
+                                    <option value="IT">IT Team</option>
+                                    <option value="Administration">Administration</option>
+                                    <option value="Sales">Sales Team</option>
+                                </>
+                            )}
                         </select>
 
                     </div>

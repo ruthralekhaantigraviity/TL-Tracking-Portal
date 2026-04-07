@@ -1,0 +1,42 @@
+.add-team-modal {
+    max-width: 600px;
+    height: auto;
+    padding: 2.5rem;
+    border-radius: 24px;
+}
+
+.add-team-modal.light-theme {
+    background: var(--bg-card);
+}
+
+.team-form {
+    margin-top: 2rem;
+}
+
+.team-form textarea {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    outline: none;
+    width: 100%;
+    resize: none;
+}
+
+.team-form textarea:focus {
+    border-color: var(--accent-primary);
+    background: var(--bg-glass-heavy);
+}
+
+.team-icon {
+    background: linear-gradient(135deg, #4f46e5, #9333ea);
+    color: #fff;
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
