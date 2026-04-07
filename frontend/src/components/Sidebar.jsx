@@ -1,9 +1,10 @@
 import React from 'react';
-import { LayoutDashboard, Users, User, LogOut, ChevronRight, Shield } from 'lucide-react';
+import { LayoutDashboard, Users, User, LogOut, ChevronRight, Shield, UserPlus } from 'lucide-react';
 import '../styles/Sidebar.css';
 
-const Sidebar = ({ activeTab, setActiveTab, onLogout, user, selectedTeam }) => {
+const Sidebar = ({ activeTab, setActiveTab, onLogout, user, selectedTeam, onAddAccount }) => {
     const isAdministration = selectedTeam === 'Administration';
+    const canAddAccount = user?.role === 'Admin' || user?.role === 'Manager';
     const menuItems = [
         { id: 'dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
         { id: 'hr-team', icon: <Users size={20} />, label: 'Team' },
@@ -35,7 +36,12 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, user, selectedTeam }) => {
             </nav>
 
             <div className="sidebar-footer">
-
+                {canAddAccount && (
+                    <button className="nav-item add-account-btn" onClick={onAddAccount} style={{ color: 'var(--accent-color)', marginBottom: '10px' }}>
+                        <span className="item-icon"><UserPlus size={20} /></span>
+                        <span className="item-label">Add Account</span>
+                    </button>
+                )}
                 <button className="nav-item logout" onClick={onLogout}>
                     <span className="item-icon"><LogOut size={20} /></span>
                     <span className="item-label">Logout</span>

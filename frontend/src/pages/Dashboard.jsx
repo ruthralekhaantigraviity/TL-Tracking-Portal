@@ -29,7 +29,6 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isAddTeamModalOpen, setIsAddTeamModalOpen] = useState(false);
-    const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
     const [teams, setTeams] = useState([]);
     const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
     const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
@@ -505,18 +504,6 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                             )}
                         </div>
                     )}
-
-
-
-
-                    {(user.role === 'Admin' || user.role === 'Manager') && (
-                        <div className="admin-actions-group" style={{ display: 'flex', gap: '12px', marginRight: '12px' }}>
-                            <button className="btn-primary" onClick={() => setIsAddUserModalOpen(true)}>
-                                <UserPlus size={18} /> Add Account
-                            </button>
-                        </div>
-                    )}
-
                     {selectedTeam !== 'Administration' && (user.role === 'Admin' || user.role === 'Manager' || user.role === 'TL') && (
                         <div className="action-center-group" style={{ display: 'flex', gap: '12px' }}>
                             {viewMode === 'overview' ? (
@@ -596,7 +583,7 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                             <ShieldCheck size={24} style={{ color: '#6366f1' }} />
                             <div>
                                 <strong style={{ display: 'block', color: '#6366f1', marginBottom: '2px' }}>Administrative Policy</strong>
-                                <p style={{ margin: 0, opacity: 0.8 }}>External registration is disabled. Only the Portal Administrator can generate login credentials via the <strong>Add Account</strong> tool above.</p>
+                                <p style={{ margin: 0, opacity: 0.8 }}>External registration is disabled. Only the Portal Administrator can generate login credentials via the <strong>Add Account</strong> option in the sidebar.</p>
                             </div>
                         </div>
                         <button 
@@ -1175,13 +1162,6 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                 />
             )}
 
-            <AddUserModal 
-                isOpen={isAddUserModalOpen} 
-                onClose={() => setIsAddUserModalOpen(false)} 
-                onUserAdded={() => {
-                    // Update stats or just toast (toast handled in modal)
-                }}
-            />
         </div>
     );
 };
