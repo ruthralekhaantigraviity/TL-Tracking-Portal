@@ -449,22 +449,8 @@ const Dashboard = ({
                     </div>
                 </div>
                 <div className="header-actions">
-                    {selectedTeam === 'Administration' ? (
-                         <div className="report-selector-group" style={{ display: 'flex', gap: '15px' }}>
-                             <div className="report-controls">
-                                 <FileText size={16} />
-                                 <select value={reportType} onChange={(e) => setReportType(e.target.value)}>
-                                     <option value="daily">Daily Report</option>
-                                     <option value="weekly">Weekly Report</option>
-                                     <option value="monthly">Monthly Report</option>
-                                 </select>
-                             </div>
-                             <button className="btn-primary" onClick={downloadAdminPDF}>
-                                 <Download size={18} />
-                                 Download Executive Report
-                             </button>
-                         </div>
-                    ) : (user.role === 'Admin' || user.role === 'Manager') && (
+                    )}
+                    {(selectedTeam !== 'Administration' && (user.role === 'Admin' || user.role === 'Manager')) && (
                         <div className="admin-controls glass" style={{ marginRight: '15px', display: 'flex', alignItems: 'center', background: 'var(--bg-glass)', padding: '5px 15px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                             <ShieldCheck size={16} style={{ color: '#6366f1', marginRight: '10px' }} />
                             <select 
@@ -515,7 +501,7 @@ const Dashboard = ({
                         </div>
                     )}
                     <div className="action-center-group" style={{ display: 'flex', gap: '12px' }}>
-                        {viewMode !== 'overview' && (
+                        {(viewMode !== 'overview' || selectedTeam === 'Administration') && (
                             <div className="report-selector-group" style={{ display: 'flex', gap: '15px' }}>
                                 <div className="report-controls">
                                     <FileText size={16} />
@@ -525,8 +511,12 @@ const Dashboard = ({
                                         <option value="monthly">Monthly Report</option>
                                     </select>
                                 </div>
-                                <button className="btn-primary" onClick={downloadTeamPDF}>
-                                    <Download size={18} /> Report
+                                <button 
+                                    className="btn-primary" 
+                                    onClick={selectedTeam === 'Administration' ? downloadAdminPDF : downloadTeamPDF}
+                                >
+                                    <Download size={18} />
+                                    {selectedTeam === 'Administration' ? 'Executive Report' : 'Report'}
                                 </button>
                             </div>
                         )}
