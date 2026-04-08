@@ -60,7 +60,7 @@ const AddUserModal = ({ isOpen, onClose }) => {
                     </div>
                     <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, lineHeight: 1.2 }}>Create New <br/>User Account</h3>
+                            <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, lineHeight: 1.2, color: 'var(--text-primary)' }}>Create New <br/>User Account</h3>
                             <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '5px' }}>
                                 <X size={20} />
                             </button>
@@ -83,15 +83,15 @@ const AddUserModal = ({ isOpen, onClose }) => {
                             placeholder="e.g. John Doe"
                             style={{ 
                                 width: '100%', padding: '12px 16px', borderRadius: '10px', 
-                                background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-color)', 
-                                color: 'white', outline: 'none', transition: 'border-color 0.2s'
+                                background: 'var(--input-bg)', border: '1px solid var(--border-color)', 
+                                color: 'var(--text-primary)', outline: 'none', transition: 'border-color 0.2s'
                             }}
                         />
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                         <div className="form-group">
-                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Username</label>
+                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Username</label>
                             <input
                                 type="text"
                                 required
@@ -100,14 +100,14 @@ const AddUserModal = ({ isOpen, onClose }) => {
                                 placeholder="username"
                                 style={{ 
                                     width: '100%', padding: '12px 16px', borderRadius: '10px', 
-                                    background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-color)', 
-                                    color: 'white', outline: 'none'
+                                    background: 'var(--input-bg)', border: '1px solid var(--border-color)', 
+                                    color: 'var(--text-primary)', outline: 'none'
                                 }}
                             />
                         </div>
 
                         <div className="form-group">
-                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Password</label>
+                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Password</label>
                             <input
                                 type="password"
                                 required
@@ -116,8 +116,8 @@ const AddUserModal = ({ isOpen, onClose }) => {
                                 placeholder="********"
                                 style={{ 
                                     width: '100%', padding: '12px 16px', borderRadius: '10px', 
-                                    background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-color)', 
-                                    color: 'white', outline: 'none'
+                                    background: 'var(--input-bg)', border: '1px solid var(--border-color)', 
+                                    color: 'var(--text-primary)', outline: 'none'
                                 }}
                             />
                         </div>
@@ -125,7 +125,7 @@ const AddUserModal = ({ isOpen, onClose }) => {
 
                     <div style={{ display: 'grid', gridTemplateColumns: '60% 1fr', gap: '15px' }}>
                         <div className="form-group">
-                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Designation</label>
+                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Designation</label>
                             <input
                                 type="text"
                                 required
@@ -134,52 +134,52 @@ const AddUserModal = ({ isOpen, onClose }) => {
                                 placeholder="e.g. TL - BDE"
                                 style={{ 
                                     width: '100%', padding: '12px 16px', borderRadius: '10px', 
-                                    background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-color)', 
-                                    color: 'white', outline: 'none'
+                                    background: 'var(--input-bg)', border: '1px solid var(--border-color)', 
+                                    color: 'var(--text-primary)', outline: 'none'
                                 }}
                             />
                         </div>
                         <div className="form-group">
-                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Role</label>
+                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Role</label>
                             <select
                                 value={formData.role}
                                 onChange={(e) => setFormData({...formData, role: e.target.value})}
                                 style={{ 
                                     width: '100%', padding: '12px 10px', borderRadius: '10px', 
-                                    background: 'rgba(255,255,255,0.1)', border: '1px solid var(--border-color)', 
-                                    color: 'white', outline: 'none', cursor: 'pointer'
+                                    background: 'var(--bg-glass-heavy)', border: '1px solid var(--border-color)', 
+                                    color: 'var(--text-primary)', outline: 'none', cursor: 'pointer'
                                 }}
                             >
-                                <option value="TL" style={{ background: '#0f172a' }}>TL</option>
-                                <option value="Manager" style={{ background: '#0f172a' }}>Manager</option>
-                                <option value="Admin" style={{ background: '#0f172a' }}>Admin</option>
+                                <option value="TL" style={{ background: 'var(--bg-sidebar)', color: 'var(--text-primary)' }}>TL</option>
+                                <option value="Manager" style={{ background: 'var(--bg-sidebar)', color: 'var(--text-primary)' }}>Manager</option>
+                                <option value="Admin" style={{ background: 'var(--bg-sidebar)', color: 'var(--text-primary)' }}>Admin</option>
                             </select>
                         </div>
                     </div>
 
                     <div className="form-group" style={{ marginBottom: '10px' }}>
-                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Assigned Team</label>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Assigned Team</label>
                         <select
                             required
                             value={formData.assignedTeam}
                             onChange={(e) => setFormData({...formData, assignedTeam: e.target.value})}
                             style={{ 
                                 width: '100%', padding: '12px 16px', borderRadius: '10px', 
-                                background: 'rgba(255,255,255,0.1)', border: '1px solid var(--border-color)', 
-                                color: 'white', outline: 'none', cursor: 'pointer'
+                                background: 'var(--bg-glass-heavy)', border: '1px solid var(--border-color)', 
+                                color: 'var(--text-primary)', outline: 'none', cursor: 'pointer'
                             }}
                         >
-                            <option value="" style={{ background: '#0f172a' }}>Select Team</option>
+                            <option value="" style={{ background: 'var(--bg-sidebar)', color: 'var(--text-primary)' }}>Select Team</option>
                             {existingTeams.map(team => (
-                                <option key={team} value={team} style={{ background: '#0f172a' }}>{team}</option>
+                                <option key={team} value={team} style={{ background: 'var(--bg-sidebar)', color: 'var(--text-primary)' }}>{team}</option>
                             ))}
                         </select>
                     </div>
 
                     <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
                         <button type="button" onClick={onClose} style={{ 
-                            flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', 
-                            border: '1px solid var(--border-color)', color: 'white', cursor: 'pointer', fontWeight: 600
+                            flex: 1, padding: '12px', borderRadius: '12px', background: 'var(--bg-glass)', 
+                            border: '1px solid var(--border-color)', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 600
                         }}>
                             Cancel
                         </button>
