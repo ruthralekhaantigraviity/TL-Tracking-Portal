@@ -449,7 +449,6 @@ const Dashboard = ({
                     </div>
                 </div>
                 <div className="header-actions">
-                    )}
                     {(selectedTeam !== 'Administration' && (user.role === 'Admin' || user.role === 'Manager')) && (
                         <div className="admin-controls glass" style={{ marginRight: '15px', display: 'flex', alignItems: 'center', background: 'var(--bg-glass)', padding: '5px 15px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                             <ShieldCheck size={16} style={{ color: '#6366f1', marginRight: '10px' }} />
