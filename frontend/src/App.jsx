@@ -252,6 +252,7 @@ function App() {
       );
     }
 
+    switch (activeTab) {
       case 'dashboard':
         return (
           <Dashboard 
@@ -299,6 +300,7 @@ function App() {
             setIsAddModalOpen={setIsAddMemberModalOpen}
           />
         );
+    }
   };
 
   return (
