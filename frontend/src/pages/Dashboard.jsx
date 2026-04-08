@@ -452,11 +452,12 @@ const Dashboard = ({
                     {selectedTeam === 'Administration' ? (
                          <div className="report-selector-group" style={{ display: 'flex', gap: '15px' }}>
                              <div className="report-controls">
-                                 <Clock size={16} />
-                                 <Clock size={16} />
-                             <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                             <span style={{ color: 'var(--text-secondary)' }}>to</span>
-                             <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                                 <FileText size={16} />
+                                 <select value={reportType} onChange={(e) => setReportType(e.target.value)}>
+                                     <option value="daily">Daily Report</option>
+                                     <option value="weekly">Weekly Report</option>
+                                     <option value="monthly">Monthly Report</option>
+                                 </select>
                              </div>
                              <button className="btn-primary" onClick={downloadAdminPDF}>
                                  <Download size={18} />
