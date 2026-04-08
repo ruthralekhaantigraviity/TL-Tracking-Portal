@@ -18,6 +18,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/hr', hrRoutes);
+app.use('/hr', hrRoutes); // Redundant mount for Vercel routing flexibility
 
 // Database Connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/hr_performance')
