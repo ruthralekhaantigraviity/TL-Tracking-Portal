@@ -10,7 +10,18 @@ import AddTeamModal from '../components/AddTeamModal';
 import AddUserModal from '../components/AddUserModal';
 import TeamPerformanceChart from '../components/TeamPerformanceChart';
 
-const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user, theme, toggleTheme }) => {
+const Dashboard = ({ 
+    viewMode = 'overview', 
+    selectedTeam, 
+    setSelectedTeam, 
+    user, 
+    theme, 
+    toggleTheme,
+    isAddTeamModalOpen,
+    setIsAddTeamModalOpen,
+    isAddModalOpen,
+    setIsAddModalOpen
+}) => {
     const [members, setMembers] = useState([]);
     const [stats, setStats] = useState({
         totalCalls: 0,
@@ -27,8 +38,6 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
 
     const [selectedMember, setSelectedMember] = useState(null);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [isAddTeamModalOpen, setIsAddTeamModalOpen] = useState(false);
     const [teams, setTeams] = useState([]);
     const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
     const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
@@ -504,41 +513,27 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                             )}
                         </div>
                     )}
-                    {selectedTeam !== 'Administration' && (user.role === 'Admin' || user.role === 'Manager' || user.role === 'TL') && (
-                        <div className="action-center-group" style={{ display: 'flex', gap: '12px' }}>
-                            {viewMode === 'overview' ? (
-                                <>
-                                    {selectedTeam === 'All' ? (
-                                        <button className="btn-primary" onClick={() => setIsAddTeamModalOpen(true)}>
-                                            <Plus size={18} /> Add Team
-                                        </button>
-                                    ) : (
-                                        <button className="btn-primary" onClick={() => setIsAddModalOpen(true)}>
-                                            <UserPlus size={18} /> Add Member
-                                        </button>
-                                    )}
-                                </>
-                            ) : (
-                                <div className="report-selector-group" style={{ display: 'flex', gap: '15px' }}>
-                                    <div className="report-controls">
-                                        <FileText size={16} />
-                                        <select value={reportType} onChange={(e) => setReportType(e.target.value)}>
-                                            <option value="daily">Daily Report</option>
-                                            <option value="weekly">Weekly Report</option>
-                                            <option value="monthly">Monthly Report</option>
-                                        </select>
-                                        <div className="divider"></div>
-                                        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                                        <span style={{ color: 'var(--text-secondary)' }}>to</span>
-                                        <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-                                    </div>
-                                    <button className="btn-primary" onClick={downloadTeamPDF}>
-                                        <Download size={18} /> Report
-                                    </button>
+                    <div className="action-center-group" style={{ display: 'flex', gap: '12px' }}>
+                        {viewMode !== 'overview' && (
+                            <div className="report-selector-group" style={{ display: 'flex', gap: '15px' }}>
+                                <div className="report-controls">
+                                    <FileText size={16} />
+                                    <select value={reportType} onChange={(e) => setReportType(e.target.value)}>
+                                        <option value="daily">Daily Report</option>
+                                        <option value="weekly">Weekly Report</option>
+                                        <option value="monthly">Monthly Report</option>
+                                    </select>
+                                    <div className="divider"></div>
+                                    <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                                    <span style={{ color: 'var(--text-secondary)' }}>to</span>
+                                    <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                                 </div>
-                            )}
-                        </div>
-                    )}
+                                <button className="btn-primary" onClick={downloadTeamPDF}>
+                                    <Download size={18} /> Report
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </header>
 
@@ -583,7 +578,7 @@ const Dashboard = ({ viewMode = 'overview', selectedTeam, setSelectedTeam, user,
                             <ShieldCheck size={24} style={{ color: '#6366f1' }} />
                             <div>
                                 <strong style={{ display: 'block', color: '#6366f1', marginBottom: '2px' }}>Administrative Policy</strong>
-                                <p style={{ margin: 0, opacity: 0.8 }}>External registration is disabled. Only the Portal Administrator can generate login credentials via the <strong>Add Account</strong> option in the sidebar.</p>
+                                <p style={{ margin: 0, opacity: 0.8 }}>Access to management controls for teams and user accounts has been moved to the sidebar for better accessibility.</p>
                             </div>
                         </div>
                         <button 

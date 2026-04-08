@@ -99,3 +99,22 @@
     background: rgba(239, 68, 68, 0.1);
     color: #ef4444;
 }
+
+.premium-btn {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    border: none !important;
+    margin-bottom: 8px;
+}
+
+.premium-btn:hover {
+    transform: translateY(-2px) translateX(4px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+    filter: brightness(1.1);
+}
+
+.premium-btn .item-icon {
+    color: white;
+}

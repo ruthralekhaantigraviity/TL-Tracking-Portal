@@ -1,10 +1,11 @@
 import React from 'react';
-import { LayoutDashboard, Users, User, LogOut, ChevronRight, Shield, UserPlus } from 'lucide-react';
+import { LayoutDashboard, Users, User, LogOut, ChevronRight, Shield, UserPlus, Plus } from 'lucide-react';
 import '../styles/Sidebar.css';
 
-const Sidebar = ({ activeTab, setActiveTab, onLogout, user, selectedTeam, onAddAccount }) => {
+const Sidebar = ({ activeTab, setActiveTab, onLogout, user, selectedTeam, onAddAccount, onAddTeam, onAddMember }) => {
     const isAdministration = selectedTeam === 'Administration';
-    const canAddAccount = user?.role === 'Admin' || user?.role === 'Manager';
+    const canManagePortal = user?.role === 'Admin' || user?.role === 'Manager';
+    const isGlobalView = selectedTeam === 'All';
     const menuItems = [
         { id: 'dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
         { id: 'hr-team', icon: <Users size={20} />, label: 'Team' },
@@ -36,11 +37,25 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, user, selectedTeam, onAddA
             </nav>
 
             <div className="sidebar-footer">
-                {canAddAccount && (
-                    <button className="nav-item add-account-btn" onClick={onAddAccount} style={{ color: 'var(--accent-color)', marginBottom: '10px' }}>
-                        <span className="item-icon"><UserPlus size={20} /></span>
-                        <span className="item-label">Add Account</span>
-                    </button>
+                {canManagePortal && (
+                    <>
+                        <button className="nav-item premium-btn" onClick={onAddAccount} title="Create user portal credentials">
+                            <span className="item-icon"><UserPlus size={20} /></span>
+                            <span className="item-label">Add Account</span>
+                        </button>
+                        
+                        {isGlobalView ? (
+                            <button className="nav-item premium-btn" onClick={onAddTeam} title="Create a new team unit">
+                                <span className="item-icon"><Plus size={20} /></span>
+                                <span className="item-label">Add Team</span>
+                            </button>
+                        ) : (
+                            <button className="nav-item premium-btn" onClick={onAddMember} title={`Add member to ${selectedTeam}`}>
+                                <span className="item-icon"><Users size={20} /></span>
+                                <span className="item-label">Add Member</span>
+                            </button>
+                        )}
+                    </>
                 )}
                 <button className="nav-item logout" onClick={onLogout}>
                     <span className="item-icon"><LogOut size={20} /></span>

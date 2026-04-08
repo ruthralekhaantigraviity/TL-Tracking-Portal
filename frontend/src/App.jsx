@@ -169,6 +169,8 @@ function App() {
   const [selectedMember, setSelectedMember] = useState(null);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [isAddTeamModalOpen, setIsAddTeamModalOpen] = useState(false);
+  const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
 
   useEffect(() => {
     // Check if user is already logged in with a valid token
@@ -250,16 +252,53 @@ function App() {
       );
     }
 
-    switch (activeTab) {
       case 'dashboard':
-        return <Dashboard viewMode="overview" selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} user={user} theme={theme} toggleTheme={toggleTheme} />;
+        return (
+          <Dashboard 
+            viewMode="overview" 
+            selectedTeam={selectedTeam} 
+            setSelectedTeam={setSelectedTeam} 
+            user={user} 
+            theme={theme} 
+            toggleTheme={toggleTheme}
+            isAddTeamModalOpen={isAddTeamModalOpen}
+            setIsAddTeamModalOpen={setIsAddTeamModalOpen}
+            isAddModalOpen={isAddMemberModalOpen}
+            setIsAddModalOpen={setIsAddMemberModalOpen}
+          />
+        );
       case 'hr-team':
         return <HRTeamList onSelectMember={(member) => setSelectedMember(member)} selectedTeam={selectedTeam} theme={theme} />;
       case 'profile':
-        return <Dashboard viewMode="performance" selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} user={user} theme={theme} toggleTheme={toggleTheme} />;
+        return (
+          <Dashboard 
+            viewMode="performance" 
+            selectedTeam={selectedTeam} 
+            setSelectedTeam={setSelectedTeam} 
+            user={user} 
+            theme={theme} 
+            toggleTheme={toggleTheme}
+            isAddTeamModalOpen={isAddTeamModalOpen}
+            setIsAddTeamModalOpen={setIsAddTeamModalOpen}
+            isAddModalOpen={isAddMemberModalOpen}
+            setIsAddModalOpen={setIsAddMemberModalOpen}
+          />
+        );
       default:
-        return <Dashboard viewMode="overview" selectedTeam={selectedTeam} setSelectedTeam={setSelectedTeam} user={user} theme={theme} toggleTheme={toggleTheme} />;
-    }
+        return (
+          <Dashboard 
+            viewMode="overview" 
+            selectedTeam={selectedTeam} 
+            setSelectedTeam={setSelectedTeam} 
+            user={user} 
+            theme={theme} 
+            toggleTheme={toggleTheme}
+            isAddTeamModalOpen={isAddTeamModalOpen}
+            setIsAddTeamModalOpen={setIsAddTeamModalOpen}
+            isAddModalOpen={isAddMemberModalOpen}
+            setIsAddModalOpen={setIsAddMemberModalOpen}
+          />
+        );
   };
 
   return (
@@ -275,6 +314,8 @@ function App() {
         user={user}
         selectedTeam={selectedTeam}
         onAddAccount={() => setIsAddUserModalOpen(true)}
+        onAddTeam={() => setIsAddTeamModalOpen(true)}
+        onAddMember={() => setIsAddMemberModalOpen(true)}
       />
       <main className="main-content">
         {renderContent()}
