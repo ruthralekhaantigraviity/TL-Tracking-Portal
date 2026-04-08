@@ -5,6 +5,16 @@ const HRMember = require('../models/HRMember');
 const User = require('../models/User');
 const Team = require('../models/Team');
 const AdminActivity = require('../models/AdminActivity');
+const rateLimit = require('express-rate-limit');
+
+// Rate limiter for login: 5 attempts per 15 minutes
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // Increased to 10 as a reasonable middle ground
+    message: { message: 'Too many login attempts from this IP, please try again after 15 minutes' },
+    standardHeaders: true, 
+    legacyHeaders: false,
+});
 
 const JWT_SECRET = 'forge-india-secret-2024';
 
@@ -37,7 +47,7 @@ const auth = async (req, res, next) => {
 
 // @route   POST /api/hr/login
 // @desc    User Login
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
         console.log(`Login attempt for: ${username}`);

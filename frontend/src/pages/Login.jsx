@@ -20,7 +20,7 @@ const Login = ({ onLoginSuccess }) => {
       toast.success(`Welcome back, ${data.user.name}!`);
       onLoginSuccess(data.user);
     } catch (err) {
-      toast.error('Invalid username or password');
+      toast.error(err.message || 'Invalid username or password');
     } finally {
       setLoading(false);
     }

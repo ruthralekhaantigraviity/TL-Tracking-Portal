@@ -37,6 +37,9 @@ export const login = async (username, password) => {
         const response = await axios.post(`${API_URL}/login`, { username, password });
         return response.data;
     } catch (error) {
+        if (error.response && error.response.status === 429) {
+            throw new Error(error.response.data.message || 'Too many attempts. Please try again later.');
+        }
         console.error('Login error:', error);
         throw error;
     }
