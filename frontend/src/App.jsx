@@ -9,7 +9,6 @@ import Login from './pages/Login';
 import AddUserModal from './components/AddUserModal';
 import { seedData, getTeams, register } from './api/api';
 import toast from 'react-hot-toast';
-import { Sun, Moon } from 'lucide-react';
 
 function App() {
   const [user, setUser] = useState(null);
