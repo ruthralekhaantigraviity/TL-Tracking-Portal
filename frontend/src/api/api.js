@@ -62,6 +62,8 @@ export const fetchTeams = async () => {
     }
 };
 
+export const getTeams = fetchTeams;
+
 export const fetchMembers = async (team) => {
     try {
         const response = await axios.get(API_URL, { 
