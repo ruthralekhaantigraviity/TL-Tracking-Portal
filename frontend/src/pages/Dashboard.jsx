@@ -523,10 +523,6 @@ const Dashboard = ({
                                         <option value="weekly">Weekly Report</option>
                                         <option value="monthly">Monthly Report</option>
                                     </select>
-                                    <div className="divider"></div>
-                                    <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                                    <span style={{ color: 'var(--text-secondary)' }}>to</span>
-                                    <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                                 </div>
                                 <button className="btn-primary" onClick={downloadTeamPDF}>
                                     <Download size={18} /> Report
