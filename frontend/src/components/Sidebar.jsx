@@ -35,35 +35,39 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, onResetData, user, selecte
                         {activeTab === item.id && <ChevronRight size={16} className="active-indicator" />}
                     </button>
                 ))}
-            </nav>
 
-            <div className="sidebar-footer">
                 {canManagePortal && (
                     <>
-                        <button className="nav-item premium-btn" onClick={onAddAccount} title="Create user portal credentials">
-                            <span className="item-icon"><UserPlus size={20} /></span>
+                        <div className="nav-divider">Management</div>
+                        
+                        <button className="nav-item action-item" onClick={onAddAccount}>
+                            <span className="item-icon"><Shield size={20} /></span>
                             <span className="item-label">Add Account</span>
                         </button>
                         
                         {isGlobalView ? (
-                            <button className="nav-item premium-btn" onClick={onAddTeam} title="Create a new team unit">
+                            <button className="nav-item action-item" onClick={onAddTeam}>
                                 <span className="item-icon"><Plus size={20} /></span>
                                 <span className="item-label">Add Team</span>
                             </button>
                         ) : (
-                            <button className="nav-item premium-btn" onClick={onAddMember} title={`Add member to ${selectedTeam}`}>
-                                <span className="item-icon"><Users size={20} /></span>
+                            <button className="nav-item action-item" onClick={onAddMember}>
+                                <span className="item-icon"><UserPlus size={20} /></span>
                                 <span className="item-label">Add Member</span>
                             </button>
                         )}
+
                         {isAdmin && (
-                            <button className="nav-item reset-btn" onClick={onResetData} title="Reset Portal and Seed Data">
+                            <button className="nav-item action-item rest-nav-item" onClick={onResetData}>
                                 <span className="item-icon"><RefreshCw size={20} /></span>
                                 <span className="item-label">Reset Portal</span>
                             </button>
                         )}
                     </>
                 )}
+            </nav>
+
+            <div className="sidebar-footer">
                 <button className="nav-item logout" onClick={onLogout}>
                     <span className="item-icon"><LogOut size={20} /></span>
                     <span className="item-label">Logout</span>
