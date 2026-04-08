@@ -21,19 +21,15 @@ app.use('/api/hr', hrRoutes);
 
 // Database Connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/hr_performance')
+    .then(() => console.log('Connected to MongoDB'))
+    .catch((err) => console.error('Error connecting to MongoDB:', err.message));
 
-    .then(() => {
-        console.log('Connected to MongoDB');
-        // Only start server if not being imported (Vercel uses its own wrapper)
-        if (require.main === module) {
-            app.listen(PORT, () => {
-                console.log(`Server is running on port ${PORT}`);
-            });
-        }
-    })
-    .catch((err) => {
-        console.error('Error connecting to MongoDB:', err.message);
+// Only start server if not being imported (Vercel uses its own wrapper)
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
     });
+}
 
 // Basic route
 app.get('/', (req, res) => {
