@@ -1,156 +1,152 @@
 import React, { useState, useEffect } from 'react';
-import { X, User, Lock, ShieldCheck, Mail, Briefcase, Users, Plus, CheckCircle } from 'lucide-react';
-import { register, fetchTeams } from '../api/api';
+import { UserPlus, X } from 'lucide-react';
 import toast from 'react-hot-toast';
-import '../styles/AddUserModal.css';
+import { register, getTeams } from '../api/api';
 
-const AddUserModal = ({ isOpen, onClose, onUserAdded }) => {
+const AddUserModal = ({ isOpen, onClose }) => {
     const [formData, setFormData] = useState({
         username: '',
         password: '',
         name: '',
-        role: 'TL',
         designation: '',
-        assignedTeam: 'All'
+        role: 'TL',
+        assignedTeam: ''
     });
-    const [teams, setTeams] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [existingTeams, setExistingTeams] = useState(['SBI', 'BDE', 'Insurance', 'All', 'Administration']);
 
     useEffect(() => {
-        if (isOpen) {
-            const getTeams = async () => {
-                try {
-                    const data = await fetchTeams();
-                    setTeams(data);
-                } catch (err) {
-                    console.error('Failed to fetch teams:', err);
+        const fetchTeamsData = async () => {
+            try {
+                const response = await getTeams();
+                if (response) {
+                    const teamNames = response.map(t => t.name);
+                    setExistingTeams(prev => [...new Set([...prev, ...teamNames])]);
                 }
-            };
-            getTeams();
-        }
+            } catch (error) {
+                console.error('Failed to fetch teams:', error);
+            }
+        };
+        if (isOpen) fetchTeamsData();
     }, [isOpen]);
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
+        setIsSubmitting(true);
         try {
-            const data = await register(formData);
-            toast.success(`Account created for ${data.user.name}`);
-            onUserAdded(data.user);
-            setFormData({
-                username: '',
-                password: '',
-                name: '',
-                role: 'TL',
-                designation: '',
-                assignedTeam: 'All'
-            });
+            await register(formData);
+            toast.success('User account created successfully!');
             onClose();
-        } catch (err) {
-            toast.error(err.response?.data?.message || 'Registration failed');
+            setFormData({ username: '', password: '', name: '', designation: '', role: 'TL', assignedTeam: '' });
+        } catch (error) {
+            const errorMsg = error.response?.data?.message || 'Failed to create user account';
+            toast.error(errorMsg);
         } finally {
-            setLoading(false);
+            setIsSubmitting(false);
         }
     };
 
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay">
-            <div className="modal-content glass add-user-modal">
-                <header className="modal-header">
-                    <div className="modal-title-area">
-                        <div className="team-icon" style={{ background: 'linear-gradient(135deg, #6366f1, #a855f7)' }}>
-                            <ShieldCheck size={24} />
-                        </div>
-                        <div>
-                            <h2>Create New Account</h2>
-                            <p>Generate login credentials for team members</p>
-                        </div>
-                    </div>
-                    <button className="close-btn" onClick={onClose}>
+        <div className="modal-overlay" onClick={onClose} style={{ zIndex: 2000 }}>
+            <div className="modal-content glass" onClick={e => e.stopPropagation()} style={{ maxWidth: '450px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                    <h3 style={{ margin: 0 }}>Create New User Account</h3>
+                    <button className="close-btn" onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
                         <X size={20} />
                     </button>
-                </header>
-
-                <form onSubmit={handleSubmit} className="user-form">
-                    <div className="input-group">
-                        <label><User size={16} /> Full Name</label>
-                        <input 
-                            name="name"
-                            type="text" 
-                            placeholder="e.g. Jane Smith"
-                            value={formData.name} 
-                            onChange={handleChange} 
-                            required 
+                </div>
+                <p className="modal-subtitle" style={{ marginBottom: '20px', fontSize: '0.9rem', opacity: 0.7 }}>Generate login credentials for team members.</p>
+                
+                <form onSubmit={handleSubmit} className="add-member-form">
+                    <div className="form-group" style={{ marginBottom: '15px' }}>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.85rem' }}>Full Name</label>
+                        <input
+                            type="text"
+                            required
+                            value={formData.name}
+                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                            placeholder="e.g. John Doe"
+                            className="glass-input"
+                            style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
                         />
                     </div>
 
-                    <div className="input-group">
-                        <label><Mail size={16} /> Username</label>
-                        <input 
-                            name="username"
-                            type="text" 
-                            placeholder="login username"
-                            value={formData.username} 
-                            onChange={handleChange} 
-                            required 
+                    <div className="form-group" style={{ marginBottom: '15px' }}>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.85rem' }}>Username</label>
+                        <input
+                            type="text"
+                            required
+                            value={formData.username}
+                            onChange={(e) => setFormData({...formData, username: e.target.value.toLowerCase()})}
+                            placeholder="login_username"
+                            className="glass-input"
+                            style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
                         />
                     </div>
 
-                    <div className="input-group">
-                        <label><Lock size={16} /> Initial Password</label>
-                        <input 
-                            name="password"
-                            type="password" 
-                            placeholder="min. 6 chars"
-                            value={formData.password} 
-                            onChange={handleChange} 
-                            required 
+                    <div className="form-group" style={{ marginBottom: '15px' }}>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.85rem' }}>Password</label>
+                        <input
+                            type="password"
+                            required
+                            value={formData.password}
+                            onChange={(e) => setFormData({...formData, password: e.target.value})}
+                            placeholder="********"
+                            className="glass-input"
+                            style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
                         />
                     </div>
 
-                    <div className="input-group">
-                        <label><Briefcase size={16} /> Designation</label>
-                        <input 
-                            name="designation"
-                            type="text" 
-                            placeholder="e.g. Sales Manager"
-                            value={formData.designation} 
-                            onChange={handleChange} 
-                            required 
-                        />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                        <div className="form-group">
+                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.85rem' }}>Designation</label>
+                            <input
+                                type="text"
+                                required
+                                value={formData.designation}
+                                onChange={(e) => setFormData({...formData, designation: e.target.value})}
+                                placeholder="e.g. Team Leader"
+                                className="glass-input"
+                                style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.85rem' }}>Role</label>
+                            <select
+                                value={formData.role}
+                                onChange={(e) => setFormData({...formData, role: e.target.value})}
+                                className="glass-input"
+                                style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+                            >
+                                <option value="TL" style={{ background: '#1e293b' }}>Team Leader</option>
+                                <option value="Manager" style={{ background: '#1e293b' }}>Manager</option>
+                                <option value="Admin" style={{ background: '#1e293b' }}>Administrator</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div className="input-group">
-                        <label><ShieldCheck size={16} /> User Role</label>
-                        <select name="role" value={formData.role} onChange={handleChange}>
-                            <option value="TL">Team Leader (TL)</option>
-                            <option value="Manager">Operations Manager</option>
-                            <option value="Admin">Portal Administrator</option>
-                        </select>
-                    </div>
-
-                    <div className="input-group">
-                        <label><Users size={16} /> Assigned Dashboard</label>
-                        <select name="assignedTeam" value={formData.assignedTeam} onChange={handleChange}>
-                            <option value="All">Global Overview</option>
-                            {teams.map(team => (
-                                <option key={team._id} value={team.name}>{team.name} Department</option>
+                    <div className="form-group" style={{ marginBottom: '20px' }}>
+                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.85rem' }}>Assigned Team</label>
+                        <select
+                            required
+                            value={formData.assignedTeam}
+                            onChange={(e) => setFormData({...formData, assignedTeam: e.target.value})}
+                            className="glass-input"
+                            style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+                        >
+                            <option value="" style={{ background: '#1e293b' }}>Select Team</option>
+                            {existingTeams.map(team => (
+                                <option key={team} value={team} style={{ background: '#1e293b' }}>{team}</option>
                             ))}
                         </select>
                     </div>
 
-                    <div className="modal-footer">
-                        <button type="button" className="cancel-btn" onClick={onClose}>Cancel</button>
-                        <button type="submit" className="submit-btn" disabled={loading}>
-                            {loading ? 'Creating...' : 'Create Account'}
-                            <Plus size={20} />
+                    <div className="modal-actions" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                        <button type="button" className="btn-secondary" onClick={onClose} style={{ padding: '10px 20px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer' }}>Cancel</button>
+                        <button type="submit" className="btn-primary" disabled={isSubmitting} style={{ padding: '10px 20px', borderRadius: '8px', background: 'var(--accent-color)', border: 'none', color: 'white', cursor: 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
+                            {isSubmitting ? 'Creating...' : 'Create Account'}
                         </button>
                     </div>
                 </form>

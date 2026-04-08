@@ -118,3 +118,25 @@
 .premium-btn .item-icon {
     color: white;
 }
+
+.reset-btn {
+    background: linear-gradient(135deg, #ef4444 0%, #f97316 100%) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    border: none !important;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    opacity: 0.9;
+}
+
+.reset-btn:hover {
+    transform: translateY(-2px) translateX(4px);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+    filter: brightness(1.1);
+    opacity: 1;
+}
+
+.reset-btn .item-icon {
+    color: white;
+}

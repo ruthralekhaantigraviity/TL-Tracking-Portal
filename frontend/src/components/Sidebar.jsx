@@ -1,10 +1,11 @@
 import React from 'react';
-import { LayoutDashboard, Users, User, LogOut, ChevronRight, Shield, UserPlus, Plus } from 'lucide-react';
+import { LayoutDashboard, Users, User, LogOut, ChevronRight, Shield, UserPlus, Plus, RefreshCw } from 'lucide-react';
 import '../styles/Sidebar.css';
 
-const Sidebar = ({ activeTab, setActiveTab, onLogout, user, selectedTeam, onAddAccount, onAddTeam, onAddMember }) => {
+const Sidebar = ({ activeTab, setActiveTab, onLogout, onResetData, user, selectedTeam, onAddAccount, onAddTeam, onAddMember }) => {
     const isAdministration = selectedTeam === 'Administration';
     const canManagePortal = user?.role === 'Admin' || user?.role === 'Manager';
+    const isAdmin = user?.role === 'Admin';
     const isGlobalView = selectedTeam === 'All';
     const menuItems = [
         { id: 'dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
@@ -53,6 +54,12 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, user, selectedTeam, onAddA
                             <button className="nav-item premium-btn" onClick={onAddMember} title={`Add member to ${selectedTeam}`}>
                                 <span className="item-icon"><Users size={20} /></span>
                                 <span className="item-label">Add Member</span>
+                            </button>
+                        )}
+                        {isAdmin && (
+                            <button className="nav-item reset-btn" onClick={onResetData} title="Reset Portal and Seed Data">
+                                <span className="item-icon"><RefreshCw size={20} /></span>
+                                <span className="item-label">Reset Portal</span>
                             </button>
                         )}
                     </>
