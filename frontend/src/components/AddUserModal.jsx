@@ -50,102 +50,144 @@ const AddUserModal = ({ isOpen, onClose }) => {
 
     return (
         <div className="modal-overlay" onClick={onClose} style={{ zIndex: 2000 }}>
-            <div className="modal-content glass" onClick={e => e.stopPropagation()} style={{ maxWidth: '450px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                    <h3 style={{ margin: 0 }}>Create New User Account</h3>
-                    <button className="close-btn" onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-                        <X size={20} />
-                    </button>
+            <div className="modal-content glass animate-enter" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px', padding: '30px' }}>
+                <div style={{ display: 'flex', gap: '15px', marginBottom: '8px' }}>
+                    <div style={{ 
+                        width: '40px', height: '40px', borderRadius: '12px', background: 'var(--accent-primary)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white'
+                    }}>
+                        <UserPlus size={22} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, lineHeight: 1.2 }}>Create New <br/>User Account</h3>
+                            <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '5px' }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <p className="modal-subtitle" style={{ marginBottom: '20px', fontSize: '0.9rem', opacity: 0.7 }}>Generate login credentials for team members.</p>
                 
-                <form onSubmit={handleSubmit} className="add-member-form">
-                    <div className="form-group" style={{ marginBottom: '15px' }}>
-                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.85rem' }}>Full Name</label>
+                <p style={{ marginBottom: '25px', fontSize: '0.9rem', color: 'var(--text-secondary)', marginLeft: '55px' }}>
+                    Generate portal credentials for team members.
+                </p>
+                
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div className="form-group">
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Full Name</label>
                         <input
                             type="text"
                             required
                             value={formData.name}
                             onChange={(e) => setFormData({...formData, name: e.target.value})}
                             placeholder="e.g. John Doe"
-                            className="glass-input"
-                            style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+                            style={{ 
+                                width: '100%', padding: '12px 16px', borderRadius: '10px', 
+                                background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-color)', 
+                                color: 'white', outline: 'none', transition: 'border-color 0.2s'
+                            }}
                         />
                     </div>
 
-                    <div className="form-group" style={{ marginBottom: '15px' }}>
-                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.85rem' }}>Username</label>
-                        <input
-                            type="text"
-                            required
-                            value={formData.username}
-                            onChange={(e) => setFormData({...formData, username: e.target.value.toLowerCase()})}
-                            placeholder="login_username"
-                            className="glass-input"
-                            style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
-                        />
-                    </div>
-
-                    <div className="form-group" style={{ marginBottom: '15px' }}>
-                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.85rem' }}>Password</label>
-                        <input
-                            type="password"
-                            required
-                            value={formData.password}
-                            onChange={(e) => setFormData({...formData, password: e.target.value})}
-                            placeholder="********"
-                            className="glass-input"
-                            style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
-                        />
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
                         <div className="form-group">
-                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.85rem' }}>Designation</label>
+                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Username</label>
+                            <input
+                                type="text"
+                                required
+                                value={formData.username}
+                                onChange={(e) => setFormData({...formData, username: e.target.value.toLowerCase()})}
+                                placeholder="username"
+                                style={{ 
+                                    width: '100%', padding: '12px 16px', borderRadius: '10px', 
+                                    background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-color)', 
+                                    color: 'white', outline: 'none'
+                                }}
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Password</label>
+                            <input
+                                type="password"
+                                required
+                                value={formData.password}
+                                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                                placeholder="********"
+                                style={{ 
+                                    width: '100%', padding: '12px 16px', borderRadius: '10px', 
+                                    background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-color)', 
+                                    color: 'white', outline: 'none'
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '60% 1fr', gap: '15px' }}>
+                        <div className="form-group">
+                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Designation</label>
                             <input
                                 type="text"
                                 required
                                 value={formData.designation}
                                 onChange={(e) => setFormData({...formData, designation: e.target.value})}
-                                placeholder="e.g. Team Leader"
-                                className="glass-input"
-                                style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+                                placeholder="e.g. TL - BDE"
+                                style={{ 
+                                    width: '100%', padding: '12px 16px', borderRadius: '10px', 
+                                    background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border-color)', 
+                                    color: 'white', outline: 'none'
+                                }}
                             />
                         </div>
                         <div className="form-group">
-                            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.85rem' }}>Role</label>
+                            <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Role</label>
                             <select
                                 value={formData.role}
                                 onChange={(e) => setFormData({...formData, role: e.target.value})}
-                                className="glass-input"
-                                style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+                                style={{ 
+                                    width: '100%', padding: '12px 10px', borderRadius: '10px', 
+                                    background: 'rgba(255,255,255,0.1)', border: '1px solid var(--border-color)', 
+                                    color: 'white', outline: 'none', cursor: 'pointer'
+                                }}
                             >
-                                <option value="TL" style={{ background: '#1e293b' }}>Team Leader</option>
-                                <option value="Manager" style={{ background: '#1e293b' }}>Manager</option>
-                                <option value="Admin" style={{ background: '#1e293b' }}>Administrator</option>
+                                <option value="TL" style={{ background: '#0f172a' }}>TL</option>
+                                <option value="Manager" style={{ background: '#0f172a' }}>Manager</option>
+                                <option value="Admin" style={{ background: '#0f172a' }}>Admin</option>
                             </select>
                         </div>
                     </div>
 
-                    <div className="form-group" style={{ marginBottom: '20px' }}>
-                        <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.85rem' }}>Assigned Team</label>
+                    <div className="form-group" style={{ marginBottom: '10px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 600 }}>Assigned Team</label>
                         <select
                             required
                             value={formData.assignedTeam}
                             onChange={(e) => setFormData({...formData, assignedTeam: e.target.value})}
-                            className="glass-input"
-                            style={{ width: '100%', padding: '10px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+                            style={{ 
+                                width: '100%', padding: '12px 16px', borderRadius: '10px', 
+                                background: 'rgba(255,255,255,0.1)', border: '1px solid var(--border-color)', 
+                                color: 'white', outline: 'none', cursor: 'pointer'
+                            }}
                         >
-                            <option value="" style={{ background: '#1e293b' }}>Select Team</option>
+                            <option value="" style={{ background: '#0f172a' }}>Select Team</option>
                             {existingTeams.map(team => (
-                                <option key={team} value={team} style={{ background: '#1e293b' }}>{team}</option>
+                                <option key={team} value={team} style={{ background: '#0f172a' }}>{team}</option>
                             ))}
                         </select>
                     </div>
 
-                    <div className="modal-actions" style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                        <button type="button" className="btn-secondary" onClick={onClose} style={{ padding: '10px 20px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer' }}>Cancel</button>
-                        <button type="submit" className="btn-primary" disabled={isSubmitting} style={{ padding: '10px 20px', borderRadius: '8px', background: 'var(--accent-color)', border: 'none', color: 'white', cursor: 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
+                    <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
+                        <button type="button" onClick={onClose} style={{ 
+                            flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', 
+                            border: '1px solid var(--border-color)', color: 'white', cursor: 'pointer', fontWeight: 600
+                        }}>
+                            Cancel
+                        </button>
+                        <button type="submit" disabled={isSubmitting} style={{ 
+                            flex: 2, padding: '12px', borderRadius: '12px', background: 'linear-gradient(135deg, #6366f1, #a855f7)', 
+                            border: 'none', color: 'white', cursor: 'pointer', fontWeight: 700,
+                            boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)', opacity: isSubmitting ? 0.7 : 1
+                        }}>
                             {isSubmitting ? 'Creating...' : 'Create Account'}
                         </button>
                     </div>
