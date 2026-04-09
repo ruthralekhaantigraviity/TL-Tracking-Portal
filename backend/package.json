@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "cd frontend && npm install && npm run build",
-    "server": "cd backend && node index.js",
-    "server-dev": "cd backend && nodemon index.js"
+    "build": "cd ../frontend && npm install && npm run build",
+    "server": "node index.js",
+    "server-dev": "nodemon index.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
