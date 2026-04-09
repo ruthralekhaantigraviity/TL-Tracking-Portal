@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "cd ../frontend && npm install && npm run build",
+    "start": "node index.js",
     "server": "node index.js",
     "server-dev": "nodemon index.js"
   },
