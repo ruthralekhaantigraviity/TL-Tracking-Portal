@@ -16,8 +16,13 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Health Check
+app.get('/api/health', (req, res) => res.send('OK'));
+app.get('/health', (req, res) => res.send('OK'));
+
 // Routes
 app.use('/api/hr', hrRoutes);
+app.use('/hr', hrRoutes); // Fallback for various deployment environments
 
 // Database Connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/hr_performance')

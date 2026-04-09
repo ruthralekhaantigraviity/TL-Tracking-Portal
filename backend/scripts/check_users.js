@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const User = require('./backend/models/User');
+const User = require('../models/User');
 
-dotenv.config({ path: './backend/.env' });
+dotenv.config({ path: './.env' });
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/hr_performance';
 
