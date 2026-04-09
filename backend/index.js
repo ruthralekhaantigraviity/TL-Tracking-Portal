@@ -9,6 +9,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Diagnostic Logger
+app.use((req, res, next) => {
+    console.log(`[API Log] ${req.method} ${req.url}`);
+    next();
+});
+
 // Middleware
 app.use(cors({
     origin: ['https://tl-tracking-portal-vzew.vercel.app', 'http://localhost:5173'],
@@ -39,6 +45,17 @@ if (require.main === module) {
 // Basic route
 app.get('/', (req, res) => {
     res.send('HR Performance API is running...');
+});
+
+// Custom 404 Handler for Diagnostics
+app.use((req, res) => {
+    console.log(`[404 Error] Not Found: ${req.url}`);
+    res.status(404).json({ 
+        message: 'Route not found in Express', 
+        path: req.url,
+        method: req.method,
+        timestamp: new Date().toISOString()
+    });
 });
 
 module.exports = app;
