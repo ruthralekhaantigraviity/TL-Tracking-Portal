@@ -11,20 +11,28 @@ const PORT = process.env.PORT || 5000;
 
 // Diagnostic Logger
 app.use((req, res, next) => {
-    console.log(`[API Log] ${req.method} ${req.url}`);
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] ${req.method} ${req.url}`);
+    console.log(`- Host: ${req.headers.host}`);
+    console.log(`- Origin: ${req.headers.origin}`);
     next();
 });
 
 // Middleware
 app.use(cors({
-    origin: ['https://tl-tracking-portal-vzew.vercel.app', 'http://localhost:5173'],
+    origin: [
+        'https://tl-tracking-portal-vzew.vercel.app', 
+        'http://localhost:5173', 
+        'http://127.0.0.1:5173'
+    ],
     credentials: true
 }));
 app.use(express.json());
 
 // Health Check
-app.get('/api/health', (req, res) => res.send('OK'));
-app.get('/health', (req, res) => res.send('OK'));
+app.get('/api/health', (req, res) => res.json({ status: 'OK', environment: process.env.NODE_ENV }));
+app.get('/health', (req, res) => res.json({ status: 'OK', source: 'root' }));
+app.get('/api/hr/health', (req, res) => res.json({ status: 'OK', source: 'api/hr' }));
 
 // Routes
 app.use('/api/hr', hrRoutes);
@@ -49,12 +57,14 @@ app.get('/', (req, res) => {
 
 // Custom 404 Handler for Diagnostics
 app.use((req, res) => {
-    console.log(`[404 Error] Not Found: ${req.url}`);
+    const errorMsg = `[404 Error] Not Found: ${req.url}`;
+    console.log(errorMsg);
     res.status(404).json({ 
         message: 'Route not found in Express', 
         path: req.url,
         method: req.method,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        suggestion: 'Check if you are missing /api/hr prefix or if the proxy is stripping it.'
     });
 });
 

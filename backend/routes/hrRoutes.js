@@ -44,13 +44,25 @@ const auth = async (req, res, next) => {
         res.status(401).json({ message: 'Session expired. Please log in again.', details: e.message });
     }
 };
+ 
+ // @route   GET /api/hr/test
+ // @desc    Test Connectivity
+ router.get('/test', (req, res) => {
+     res.json({ message: 'HR Routes are reachable', timestamp: new Date().toISOString() });
+ });
 
 // @route   POST /api/hr/login
 // @desc    User Login
 router.post('/login', loginLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
-        console.log(`Login attempt for: ${username}`);
+        console.log(`[LOGIN] Attempt for: "${username}"`);
+        
+        if (!username || !password) {
+            console.log('[LOGIN] Missing credentials');
+            return res.status(400).json({ message: 'Username and password are required' });
+        }
+        
         // Case-insensitive search for username
         const user = await User.findOne({ username: { $regex: new RegExp(`^${username}$`, 'i') } });
         if (!user) {

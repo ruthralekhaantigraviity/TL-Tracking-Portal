@@ -28,6 +28,17 @@ axios.interceptors.response.use(
             toast.error('Session expired. Please log in again.');
             window.location.reload();
         }
+
+        // Detailed logging for development
+        if (error.response) {
+            console.error(`[API Error] ${error.config.method.toUpperCase()} ${error.config.url}: ${error.response.status} ${error.response.statusText}`);
+            console.error('Data:', error.response.data);
+        } else if (error.request) {
+            console.error('[API Error] No response received:', error.request);
+        } else {
+            console.error('[API Error] Request setup failed:', error.message);
+        }
+
         return Promise.reject(error);
     }
 );
@@ -41,6 +52,9 @@ export const login = async (username, password) => {
             throw new Error(error.response.data.message || 'Too many attempts. Please try again later.');
         }
         console.error('Login error:', error);
+        if (error.response && error.response.status === 404) {
+            throw new Error(`Login endpoint not found (404). Check backend connectivity at ${error.config.url}`);
+        }
         throw error;
     }
 };
