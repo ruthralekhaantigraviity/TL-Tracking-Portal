@@ -1,7 +1,8 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API_URL = '/api/hr';
+const BASE_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = `${BASE_URL}/api/hr`;
 
 // Add interceptor to attach token to every request
 axios.interceptors.request.use(
