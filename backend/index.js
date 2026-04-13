@@ -20,13 +20,20 @@ app.use((req, res, next) => {
 
 // Middleware
 app.use(cors({
-    origin: [
-        'https://tl-tracking-portal-vzew.vercel.app', 
-        'https://tl-tracking-portal-kk6n.vercel.app',
-        /\.vercel\.app$/, // Allow any Vercel deployment
-        'http://localhost:5173', 
-        'http://127.0.0.1:5173'
-    ],
+    origin: (origin, callback) => {
+        const allowedOrigins = [
+            'https://tl-tracking-portal-vzew.vercel.app',
+            'https://tl-tracking-portal-kk6n.vercel.app',
+            'http://localhost:5173',
+            'http://127.0.0.1:5173'
+        ];
+        // Allow any vercel.app subdomain or no origin (curl/Postman)
+        if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+            callback(null, true);
+        } else {
+            callback(new Error(`CORS blocked: ${origin}`));
+        }
+    },
     credentials: true
 }));
 app.use(express.json());
