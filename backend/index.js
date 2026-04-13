@@ -22,6 +22,7 @@ app.use((req, res, next) => {
 app.use(cors({
     origin: [
         'https://tl-tracking-portal-vzew.vercel.app', 
+        'https://tl-tracking-portal-kk6n.vercel.app',
         'http://localhost:5173', 
         'http://127.0.0.1:5173'
     ],
