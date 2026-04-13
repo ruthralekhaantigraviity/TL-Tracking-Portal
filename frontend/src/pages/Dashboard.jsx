@@ -3,7 +3,7 @@ import { Phone, Users, MessageSquare, TrendingUp, CheckCircle, Target, Briefcase
 import html2pdf from 'html2pdf.js';
 import toast from 'react-hot-toast';
 import '../styles/Dashboard.css';
-import { fetchMembers, updateMember, createMember, deleteMember, deleteTeam, seedData } from '../api/api';
+import { fetchMembers, updateMember, createMember, deleteMember, fetchTeams, deleteTeam, createTeam, getAdminActivity, saveAdminActivity, seedData } from '../api/api';
 import StatsEntryModal from '../components/StatsEntryModal';
 import AddMemberModal from '../components/AddMemberModal';
 import AddTeamModal from '../components/AddTeamModal';
@@ -85,12 +85,8 @@ const Dashboard = ({
 
     const getTeams = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch('/api/hr/teams', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
+            const data = await fetchTeams();
+            if (data) {
                 setTeams(data);
             }
         } catch (err) {
@@ -101,66 +97,35 @@ const Dashboard = ({
     useEffect(() => {
         getStats();
         getTeams();
-        if (selectedTeam === 'Administration') getAdminActivity();
-    }, [selectedTeam, startDate, endDate]); 
+        if (selectedTeam === 'Administration') getAdminLog();
+    }, [selectedTeam, startDate, endDate, selectedDate]); 
 
-    const getAdminActivity = async () => {
+    const getAdminLog = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`/api/hr/admin/activity/${selectedDate}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setAdminComment(data.content);
-            } else {
-                setAdminComment('');
+            const data = await getAdminActivity(selectedDate);
+            if (data) {
+                setAdminComment(data.content || '');
             }
         } catch (err) {
             console.error('Failed to fetch admin log:', err);
+            setAdminComment('');
         }
     };
 
     const handleAdminSubmit = async () => {
         if (!adminComment.trim()) return toast.error('Please enter activity highlights');
         
-        const token = localStorage.getItem('token');
-        if (!token) return toast.error('Session expired. Please log in again.');
-        
         setIsAdminSubmitting(true);
         try {
-            const res = await fetch('/api/hr/admin/activity', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ content: adminComment, date: selectedDate })
-            });
-
-            const data = await res.json().catch(() => ({}));
-            
-            if (res.ok) {
-                toast.success('Activity Log saved successfully!');
-                // Automatically redirect to Global Overview after 1.5s
-                setTimeout(() => {
-                    setSelectedTeam('All');
-                }, 1500);
-            } else {
-                // Determine the best message to show from data or status
-                const errorMsg = data.message || data.error || data.details || `Error ${res.status}: Failed to save`;
-                throw new Error(errorMsg);
-            }
+            await saveAdminActivity(adminComment, selectedDate);
+            toast.success('Activity Log saved successfully!');
+            // Automatically redirect to Global Overview after 1.5s
+            setTimeout(() => {
+                setSelectedTeam('All');
+            }, 1500);
         } catch (err) {
-            if (err.message.includes('Session expired')) {
-                toast.error('Your session has expired. Redirecting to login...');
-                setTimeout(() => {
-                    localStorage.removeItem('token');
-                    window.location.href = '/login';
-                }, 2000);
-            } else {
-                toast.error(err.message || 'Network error saving activity log');
-            }
+            const errorMsg = err.response?.data?.message || err.message || 'Error saving activity log';
+            toast.error(errorMsg);
             console.error('Save failed:', err);
         } finally {
             setIsAdminSubmitting(false);
@@ -285,26 +250,14 @@ const Dashboard = ({
 
     const handleAddTeam = async (newTeamData) => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch('/api/hr/teams', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(newTeamData)
-            });
-            if (res.ok) {
-                toast.success('Team created successfully!');
-                setIsAddTeamModalOpen(false);
-                getTeams();
-            } else {
-                const data = await res.json();
-                toast.error(data.message || 'Failed to create team');
-            }
+            await createTeam(newTeamData);
+            toast.success('Team created successfully!');
+            setIsAddTeamModalOpen(false);
+            getTeams();
         } catch (err) {
             console.error('Failed to create team:', err);
-            toast.error('Network error creating team');
+            const errorMsg = err.response?.data?.message || err.message || 'Error creating team';
+            toast.error(errorMsg);
         }
     };
 
